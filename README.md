@@ -1,1 +1,1 @@
-# se-practice
+Olzhabay Kuanysh (Monday 16:00-19:00)
