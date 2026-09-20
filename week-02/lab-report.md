@@ -119,23 +119,49 @@ python -m unittest)
 **Assumptions C stated explicitly before the code:**
 
 ---
+Validates pass_mark, then emptiness, then per-mark type/range, before computing
+anything - so invalid input never produces a partial result. Explicitly rejects
+bool as a mark type and NaN via the range check.
 
 ## 5. Prompt D — my combined prompt
 
 **The complete prompt I wrote** (one message, sent to a fresh chat):
 
 ```
+You are a Python developer. Implement analyze_marks(marks, pass_mark=50).
 
+Return a dictionary with exactly these keys: average, highest, lowest, pass_rate.
+Round average and pass_rate to 2 decimal places using round().
+
+Validation rules — raise ValueError (and only ValueError, never TypeError or any
+other exception type) in every one of these cases: the list is empty, any mark is
+not a number (int or float), or any mark is outside the range 0–100 inclusive.
+
+A mark equal to pass_mark counts as passing (use >=, not >).
+
+Use no external libraries — standard library only.
+
+Example: analyze_marks([40, 60, 80], 50) -> average 60.0, highest 80, lowest 40,
+pass_rate 66.67
+
+Include tests for: one mark, decimals, a custom pass_mark, an empty list, a text
+value in the list, and marks below 0 or above 100.
+
+State any remaining assumptions before the code.
 ```
 
 **What I deliberately added that A, B and C did not have:**
 
-1.
-2.
-3.
+1. An explicit rule that only ValueError may be raised for any invalid input, never TypeError
+2. An explicit rounding requirement (round to 2 decimals)
+3. An explicit ">=" rule for the pass_mark boundary
 
 **The ambiguity I found in the specification, and how I resolved it inside Prompt D:**
-
+Nothing in the spec says which exception type covers a non-numeric mark versus an
+out-of-range one. An earlier attempt at Prompt C actually raised TypeError for a
+non-numeric mark, which the harness scores as ERROR rather than PASS, since only
+ValueError is accepted. I resolved this in Prompt D by stating explicitly that only
+ValueError may ever be raised, for every invalid case.
 ---
 
 ## 6. Test results — the evidence
