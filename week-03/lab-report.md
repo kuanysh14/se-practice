@@ -3,9 +3,9 @@
 Fill in every section. **Do not delete or renumber the headings** — the README points at them and a
 missing heading reads as a missing section.
 
-Name:
-Student ID:
-GitHub username:
+Name: Olzhabay Kuanysh
+Student ID: 24B031954
+GitHub username: kuanysh14
 
 ---
 
@@ -69,14 +69,20 @@ this is the baseline everything else is measured against.
 One row per change you made. "Kept unchanged" is a valid row and needs a reason too.
 
 | Story (as generated) | What I did | Why | Final ID |
-| --- | --- | --- | --- |
-| | | | |
+| --- |---|---| --- |
+| As a Student, I want to view which rooms are free and when... | Kept unchanged | Names a real stakeholder, one testable outcome, stays inside scenario | US-01 |
+| As a Student, I want to book a free room for a specific time slot... | Kept, assumption extended | Core UC-02 goal, extended the assumption to cover confirmation-on-success, absorbing what the removed story below was trying to say | US-02 |
+| As a Student, I want to cancel a booking I made... | Kept, assumption extended | Core UC-03 goal, same reasoning — folded confirmation-on-cancel into this story's assumption | US-03 |
+| As a Student, I want to receive a confirmation when I book or cancel a room... | Removed, merged into US-02 and US-03 | Describes a system reaction to booking/cancelling (UC-06), not an independently initiated student goal; can't be tested as its own iteration separate from the action that triggers it | — |
+| As an Administrator, I want to block a room that is out of service... | Kept unchanged | Real stakeholder, matches UC-04, testable, in scope | US-04 |
+| As an Administrator, I want to unblock a room... | Kept unchanged | Matches UC-04's other half, testable, in scope | US-05 |
+| As an Administrator, I want to review room usage over a chosen period... | Kept unchanged | Matches UC-05, explicitly scoped to booking records only, but flagged for a closer look at Part 4 (does an Administrator actually *trigger* this, or is it closer to a passive report?) | US-06 |
 
-**Did the assistant invent anything outside the scenario?** Name it against the out-of-scope list in
-README section 1, or write "no, and here is how I checked".
+**Did the assistant invent anything outside the scenario?**
+No. It checked every story's goal and assumption against the out-of-scope list (payments, QR/check-in, equipment/maintenance, extra notification channels, auth, waiting lists, UI/DB detail), none appeared. One real issue wasn't invented scope, it was UC-06 (confirmation) framed as a standalone student initiated goal, but it's actually a system reaction to UC-02/UC-03.
 
 **How many stories did you end with, and why that number?**
-
+Six stories. Removing the confirmation story left five stories mapping one-to-one onto UC-01-UC-05. UC-06 isn't dropped, it's covered as an expected outcome inside US-02 and US-03's assumptions rather than as its own story. Since it has no independent trigger  
 ---
 
 ## 4. Original AI output — acceptance criteria (Part 3)
