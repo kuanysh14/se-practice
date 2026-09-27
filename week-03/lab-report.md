@@ -239,26 +239,79 @@ Paste the **real terminal output** of both runs. A table with nothing behind it 
 
 ```
 $ python tests/check_requirements.py
-(paste)
+PASS   US-1  user-stories.md         no placeholders left
+PASS   US-2  user-stories.md         6 stories, IDs US-01…US-06
+PASS   US-3  user-stories.md         every story has the required sentence shape
+PASS   US-4  user-stories.md         every story has a priority
+PASS   US-5  user-stories.md         every story declares an assumption
+PASS   US-6  user-stories.md         only Student and Administrator appear as roles
+PASS   US-7  user-stories.md         nothing from the out-of-scope list appears
+PASS   AC-1  acceptance-criteria.md  no placeholders left
+PASS   AC-2  acceptance-criteria.md  three sections, all naming real stories: US-02, US-03, US-04
+PASS   AC-3  acceptance-criteria.md  every section has 3 to 5 uniquely numbered criteria
+PASS   AC-4  acceptance-criteria.md  all 14 criteria are complete Given/When/Then
+PASS   AC-5  acceptance-criteria.md  every section covers an invalid or boundary case
+PASS   AC-6  acceptance-criteria.md  6 assumptions listed before the criteria
+PASS   AC-7  acceptance-criteria.md  both open questions are settled in the assumptions
+PASS   PU-1  use-cases.puml          valid PlantUML block, no placeholders
+PASS   PU-2  use-cases.puml          exactly two actors: Student, Administrator
+PASS   PU-3  use-cases.puml          all six use cases present
+PASS   PU-4  use-cases.puml          system boundary present
+PASS   PU-5  use-cases.puml          no screens, databases or internal components
+PASS   PU-6  use-cases.puml          no unjustified actor associations found
+PASS   TR-1  traceability.md         all six use cases have a row
+PASS   TR-2  traceability.md         every ID in the table resolves
+PASS   TR-3  traceability.md         every story appears in the table
+------------------------------------------------------------------------
+23 PASS · 0 FAIL · 0 ERROR   (23 checks)
+Shape is clean. This says nothing about whether the requirements are good.
 ```
 
 ```
 $ python tests/validate_submission.py
-(paste)
+submission.yml — submission.yml
+------------------------------------------------------------------------
+PASS   schema                                    1
+PASS   week                                      03
+PASS   student.name                              Olzhabay Kuanysh
+PASS   student.student_id                        24B031954
+PASS   student.github                            kuanysh14
+PASS   assistant.tool                            Claude
+PASS   assistant.model                           Claude Sonnet 5
+PASS   counts.user_stories                       6
+PASS   counts.acceptance_criteria_sets           3
+PASS   checker                                   23 PASS · 0 FAIL · 0 ERROR
+NOTE   checker                                   you are claiming a clean run — it will be re-run at your commit, so make sure it is true
+PASS   checker.commit                            4b8687a
+PASS   assumptions.overlap_touching_bookings     allowed
+PASS   assumptions.exactly_two_hours             allowed
+PASS   traceability.use_cases_not_covered        UC-01, UC-05
+PASS   traceability.stories_not_traced           []
+PASS   review_findings                           4 findings
+PASS   review_findings[1]                        UC-06 Send confirmation has no dedicated story; it exists on…
+PASS   review_findings[2]                        The original AI output for Part 1 included a standalone conf…
+PASS   review_findings[3]                        The generated acceptance criteria never tested either open b…
+PASS   review_findings[4]                        UC-05 Review usage and the unblock half of UC-04 (US-05) hav…
+PASS   honesty.can_explain_everything_submitted  yes
+PASS   honesty.ai_usage_disclosed                yes
+------------------------------------------------------------------------
+22 PASS · 0 FAIL · 0 ERROR · 1 note
+Shape is fine. This says nothing about whether the work is good.
 ```
 
 | | PASS | FAIL | ERROR |
-| --- | --- | --- | --- |
-| `check_requirements.py` | | | |
+| --- |---|---|---|
+| `check_requirements.py` | 23 | 0 | 0 |
 
-Commit these numbers were produced at (`git rev-parse --short HEAD`):
+Commit these numbers were produced at (`git rev-parse --short HEAD`): 4b8687a
 
 **Every FAIL, one line each: what it is and what you decided to do about it.** A FAIL you report and
 explain costs you nothing.
+*None on the final run — an earlier draft of US-06 failed US-7 ("out-of-scope vocabulary: attendance") because its assumption said "not attendance," and the checker's keyword scan can't distinguish exclusion from inclusion. Reworded to "based only on booking records: counts, durations, and cancellations" instead of naming the excluded term, which resolved it cleanly.*
 
 **Did you run the checks by hand instead of with Python?** Say so here — it costs nothing, but it
 has to be said.
-
+*No*
 ---
 
 ## 10. Conclusion (150–200 words)
@@ -273,3 +326,18 @@ Answer all three:
 
 Be specific. "The AI was useful" is worth nothing; "UC-06 had no story behind it until I wrote
 US-07, and the checker is what told me" is worth everything.
+
+The most wrong piece was Prompt 1's standalone confirmation story, it treated UC-06 as
+something a Student independently wants, when it's actually a system reaction to
+US-02/US-03. No checker catches this: check_requirements.py verifies shape (a sentence, a
+priority, an assumption), not whether an actor genuinely initiates a use case. I caught it
+by walking every story against the two actor definitions and asking who really triggers
+the action. The same question PU-6 later automated for the diagram's associations, but
+nothing equivalent exists for stories themselves. What the assistant got right, and would
+have taken noticeably longer by hand, was Prompt 3's Given/When/Then coverage: 14
+consistent criteria across three stories in one pass, correctly split between happy paths
+and invalid cases, is tedious to hand-write without silently dropping a boundary. If I had
+to rewrite one requirement before handing this off, it's UC-06: it still only exists
+implicitly inside US-02 and US-03's assumptions rather than as its own testable line, and
+an implementer needs an explicit, named requirement for exactly when and how confirmation
+is sent. Not a detail buried inside someone else's story.
