@@ -88,7 +88,51 @@ Six stories. Removing the confirmation story left five stories mapping one-to-on
 ## 4. Original AI output — acceptance criteria (Part 3)
 
 ```
-(paste here)
+**US-02: Book a free room for a specific time slot**
+
+Assumptions:
+- Booking start time must be in the future (not now or earlier).
+- Maximum booking duration is 2 hours.
+- The room must be free for the entire requested slot (no overlap with existing bookings).
+- On success, the student receives a confirmation.
+
+Acceptance Criteria:
+1. **Given** a room is free for the requested time slot, **when** a student books it for a future time within a 2-hour duration, **then** the system creates the booking and shows a success confirmation.
+2. **Given** a student selects a start time that has already passed, **when** they submit the booking, **then** the system rejects it with an error stating the slot must be in the future.
+3. **Given** a student selects a duration longer than 2 hours, **when** they submit the booking, **then** the system rejects it with an error stating the 2-hour maximum.
+4. **Given** the room already has a confirmed booking that overlaps the requested slot, **when** a student tries to book it, **then** the system rejects the request and informs them the room is unavailable for that time.
+5. **Given** a room is blocked by an administrator, **when** a student tries to book it, **then** the system rejects the booking regardless of time-slot validity.
+
+---
+
+**US-03: Cancel a booking**
+
+Assumptions:
+- A student can cancel only bookings they created.
+- Cancellation is allowed only before the booking's start time.
+- On success, the student receives a confirmation.
+
+Acceptance Criteria:
+1. **Given** a student has an upcoming booking that hasn't started, **when** they request to cancel it, **then** the system cancels the booking and confirms success.
+2. **Given** a booking belongs to another student, **when** a student tries to cancel it, **then** the system rejects the request with an authorization error.
+3. **Given** a booking's start time has already passed, **when** the owning student tries to cancel it, **then** the system rejects the cancellation, stating that started or past bookings can't be cancelled.
+4. **Given** a booking has already been cancelled, **when** the student tries to cancel it again, **then** the system rejects the duplicate action and informs them it's already cancelled.
+
+---
+
+**US-04: Block a room that is out of service**
+
+Assumptions:
+- Only administrators can block a room.
+- A room can be blocked whether or not it has active bookings at that moment.
+- Once blocked, the room is unavailable for new bookings until unblocked.
+
+Acceptance Criteria:
+1. **Given** a room is currently available, **when** an administrator blocks it, **then** the system marks the room as blocked and confirms success.
+2. **Given** a room has active future bookings, **when** an administrator blocks it, **then** the system still marks it as blocked successfully (existing bookings are unaffected by this action alone).
+3. **Given** a user without administrator privileges, **when** they attempt to block a room, **then** the system rejects the request with an authorization error.
+4. **Given** a room is already blocked, **when** an administrator attempts to block it again, **then** the system informs them the room is already blocked (no duplicate action taken).
+5. **Given** a room is blocked, **when** a student attempts to book it, **then** the system rejects the booking and informs the student the room is out of service.
 ```
 
 ---
@@ -96,18 +140,33 @@ Six stories. Removing the confirmation story left five stories mapping one-to-on
 ## 5. Criteria review (Part 3)
 
 | Criterion (as generated) | Problem | What I changed it to | Final ID |
-| --- | --- | --- | --- |
-| | | | |
+| --- | --- |---| --- |
+| US-02 #1 (happy path, future + ≤2h) | none | kept unchanged | AC-01 |
+| US-02 #2 (past start rejected) | none | kept unchanged | AC-02 |
+| US-02 #3 (duration >2h rejected) | implies but never tests that exactly 2h is valid | kept unchanged, added AC-06 as its missing companion | AC-03 |
+| US-02 #4 (overlap rejected) | never defines the exact-boundary case (R3 open question) | kept unchanged, added AC-07 to resolve the boundary explicitly | AC-04 |
+| US-02 #5 (blocked room rejected) | none | kept unchanged | AC-05 |
+| — (missing) | R2's boundary was never tested as a valid case | added: exactly 2 hours is accepted | AC-06 |
+| — (missing) | R3's boundary was never decided or tested | added: back-to-back bookings are not an overlap | AC-07 |
+| US-03 #1 (happy path cancel) | none | kept unchanged | AC-08 |
+| US-03 #2 (cancel someone else's booking) | none | kept unchanged | AC-09 |
+| US-03 #3 (cancel after start passed) | none | kept unchanged | AC-10 |
+| US-03 #4 (cancel already-cancelled) | none | kept unchanged | AC-11 |
+| US-04 #1 (block available room) | none | kept unchanged | AC-12 |
+| US-04 #2 (block room with future bookings) | none | kept unchanged | AC-13 |
+| US-04 #3 (non-admin blocked) | none | kept unchanged | AC-14 |
+| US-04 #4 (block already-blocked room) | none | kept unchanged | AC-15 |
+| US-04 #5 (student books blocked room) | duplicates US-02 AC-05 almost exactly | kept, reasonable, since R4 legitimately belongs to both stories' traceability | AC-16 |
 
 **The two open questions.** Write your decision and the reason. Either answer is accepted.
 
 | Question | My decision | Why |
-| --- | --- | --- |
-| A booking ending exactly when another begins — overlap under R3? | allowed / not-allowed | |
-| Is exactly two hours allowed under R2? | allowed / not-allowed | |
+| --- |---|---|
+| A booking ending exactly when another begins — overlap under R3? | not-allowed (i.e., NOT treated as an overlap, booking is allowed | Maximizes room utilization, nothing is lost by allowing back-to-back use |
+| Is exactly two hours allowed under R2? | allowed | Matches what the generated criteria already implicitly assumed, made explicit |
 
 **Which invalid or boundary case did the assistant leave out?**
-
+Both open question boundaries. For example, it never tested exactly 2 hours as a valid duration, and never addressed or tested the back-to-back overlap case at all. Despite R2 and R3 being exactly the two rules the scenario flags as deliberately unsettled.
 ---
 
 ## 6. Original AI output — use-case diagram (Part 4)
