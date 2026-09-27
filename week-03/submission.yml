@@ -1,0 +1,50 @@
+# week-03/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "03"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5
+
+counts:
+  user_stories: 6
+  acceptance_criteria_sets: 3
+
+checker:
+  pass: 23
+  fail: 0
+  error: 0
+  commit: 4b8687a
+
+assumptions:
+  overlap_touching_bookings: allowed
+  exactly_two_hours: allowed
+
+traceability:
+  use_cases_not_covered: [UC-01, UC-05]
+  stories_not_traced: []
+
+review_findings:
+  - UC-06 Send confirmation has no dedicated story; it exists only inside US-02 and US-03's assumptions and as an include relationship in the diagram, not as an independently-triggered function.
+  - The original AI output for Part 1 included a standalone confirmation story that was removed, because it described a system reaction to US-02/US-03's own actions rather than a real Student-initiated goal.
+  - The generated acceptance criteria never tested either open boundary question until AC-01 and AC-05 were added deliberately, covering the exactly-two-hours case (R2) and the back-to-back booking case (R3).
+  - UC-05 Review usage and the unblock half of UC-04 (US-05) have no acceptance criteria, since only US-02, US-03 and US-04 were the three stories selected for Part 3.
+
+honesty:
+  can_explain_everything_submitted: yes
+  ai_usage_disclosed: yes
