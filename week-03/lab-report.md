@@ -172,24 +172,53 @@ Both open question boundaries. For example, it never tested exactly 2 hours as a
 ## 6. Original AI output — use-case diagram (Part 4)
 
 ```
-(paste the PlantUML source exactly as generated)
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor Student
+actor Administrator
+
+rectangle "Smart Campus Study Room Booking System" {
+  usecase "View availability" as UC1
+  usecase "Book room" as UC2
+  usecase "Cancel booking" as UC3
+  usecase "Block or unblock room" as UC4
+  usecase "Review usage" as UC5
+  usecase "Send confirmation" as UC6
+}
+
+Student --> UC1
+Student --> UC2
+Student --> UC3
+
+Administrator --> UC4
+Administrator --> UC5
+
+UC2 ..> UC1 : <<include>>
+UC2 ..> UC6 : <<include>>
+UC3 ..> UC6 : <<include>>
+@enduml
 ```
 
 Rendered diagram (image, or a link):
-
+![img.png](img.png)
 ---
 
 ## 7. Diagram review (Part 4)
 
-| Element | Problem | What I changed |
-| --- | --- | --- |
-| | | |
+| Element | Problem| What I changed |
+| --- |---|---|
+| UC2 (Book room) ..> UC1 (View availability), <<include>> | Debatable problem: does booking always include checking availability as a sub-flow, or is that better treated as internal validation rather than a full include of an independently-triggerable use case? | Kept, the include is defensible (a booking attempt necessarily checks current availability), but recorded as a considered judgment call rather than accepted uncritically |
+| UC6 (Send confirmation) — no direct actor association | none, this is correct | Kept as generated. Verified against the section 3 finding that confirmation isn't independently student-triggered, the model correctly modeled it as `<<include>>` from Book room and Cancel booking rather than giving it a direct actor arrow |
+| UC5 (Review usage) — Administrator only | none | Kept, matches US-06, no Student trigger, correct |
 
 **Associations.** Which actor–use-case links did the assistant draw that a person does not actually
 trigger? Name them.
+*None. Because the diagram avoided the trap entirely, it did not connect either actor directly to "Send confirmation", correctly modeling it as a consequence ofBook room / Cancel booking instead.*
 
 **Did any screen, database or internal component appear as a use case or an actor?**
-
+*No.*
 ---
 
 ## 8. Traceability (Part 5)
