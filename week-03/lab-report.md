@@ -225,12 +225,12 @@ trigger? Name them.
 
 Summarise what the table in `requirements/traceability.md` shows:
 
-- Use cases with **no story** behind them:
-- Stories with **no use case** they belong to:
-- Criteria that test **no rule** from section 1:
+- Use cases with **no story** behind them: UC-06 Send confirmation - it exists only as a consequence inside US-02/US-03's assumptions, and is modeled with `<<include>>` in the diagram rather than owned by its own story.
+- Stories with **no use case** they belong to: none.
+- Criteria that test **no rule** from section 1: AC-07, AC-09 (ownership/duplicate checks on cancellation), AC-12, AC-13 (authorization/duplicate checks on blocking). These enforce constraints implied by the actor definitions (only the owning student cancels; only an Administrator blocks) rather than one of the four numbered business rules R1–R4.
 
 **What does the largest gap tell you about the generated requirements?**
-
+*Story-based elicitation assumes every capability is something a person deliberately initiates, so a purely reactive function like confirmation gets forced into an awkward standalone story rather than recognized as a side effect of another action. That's a structural blind spot in the technique itself, not a one-off mistake by this particular run.*
 ---
 
 ## 9. Checker runs
