@@ -253,8 +253,4 @@ SUMMARY pass=37 fail=0 error=0
 
 ## 10. Conclusion (120–180 words)
 
-<Which diagram did the AI get most wrong, and what exactly was wrong? Which error would have
-reached the code if nobody had reviewed it? What did the critique find that you missed — and what
-did it claim that was false? Be specific: "the AI got the multiplicities wrong" is worth nothing;
-"the AI put 1..* on the Booking end, which says every room must already have a booking" is worth
-everything.>
+The sequence diagram was the one the AI got most wrong. Its inner alt merged R2 and R3 into a single OR'd guard, so a student could not be told whether a room was blocked or already taken. It also called booking.overlaps(requested) on a Booking that is only created later in the same flow, and its repository quietly decided overlap itself, contradicting the class diagram. The uncallable overlaps(other : Booking) signature is the error that would have reached the code: nothing could run the R2 check before a booking exists. The critique caught what I missed: R1 had no note on Booking, declared decision 2 (blocking leaves existing bookings alone) was on no diagram, start/end clashed with startTime/endTime, and two components both owned the booking workflow (Student.bookRoom versus BookingService). None of its claims was outright false, but I rejected its race-condition point (R2 between the check and save()) as outside what the review asks for and already stated in the assumptions.
