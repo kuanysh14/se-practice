@@ -1,0 +1,58 @@
+@startuml
+title Book Room - Sequence Diagram
+autonumber
+
+actor Student
+participant BookingService
+participant BookingRepository
+
+Student -> BookingService : bookRoom(studentId, roomId, startTime, endTime)
+activate BookingService
+
+BookingService -> BookingService : validateTimeSlot(startTime, endTime)
+note right
+  R1: start is in the future,
+  duration > 0 and <= 2 hours
+end note
+
+alt R1 violated
+  BookingService --> Student : rejected(reason = "invalid time slot")
+else R1 satisfied
+  BookingService -> BookingRepository : findRoom(roomId)
+  activate BookingRepository
+  BookingRepository --> BookingService : room
+
+  BookingService -> BookingRepository : findActiveBookings(roomId)
+  BookingRepository --> BookingService : activeBookings
+  deactivate BookingRepository
+
+  alt room is blocked (R3)
+    BookingService --> Student : unavailable(reason = "room blocked")
+  else continue checking the request
+    BookingService -> BookingService : checkOverlap(activeBookings, startTime, endTime)
+    note right
+      Calls booking.overlaps(startTime, endTime) on each
+      ACTIVE booking in activeBookings, per class.puml.
+      A booking that ends exactly when another begins is
+      NOT an overlap (declared decision).
+    end note
+
+    alt any booking.overlaps(startTime, endTime) is true (R2)
+      BookingService --> Student : unavailable(reason = "time slot taken")
+    else slot is free
+      BookingService -> BookingService : createBooking(studentId, room, startTime, endTime)
+      note right
+        status = ACTIVE
+        confirmationCode generated (R4)
+      end note
+      BookingService -> BookingRepository : save(booking)
+      activate BookingRepository
+      BookingRepository --> BookingService : savedBooking
+      deactivate BookingRepository
+      BookingService --> Student : confirmation(bookingId, confirmationCode, roomId, startTime, endTime)
+    end
+  end
+end
+
+deactivate BookingService
+@enduml

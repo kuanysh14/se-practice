@@ -1,0 +1,75 @@
+@startuml
+title Smart Campus Study Room Booking - Domain Class Diagram
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Student {
+  - studentId : String
+  - name : String
+}
+
+class Room {
+  - roomId : String
+  - name : String
+  - blocked : Boolean
+  + isBlocked() : Boolean
+  + block() : void
+  + unblock() : void
+  + isAvailable(startTime : DateTime, endTime : DateTime) : Boolean
+}
+
+class Booking {
+  - bookingId : String
+  - startTime : DateTime
+  - endTime : DateTime
+  - status : BookingStatus
+  - confirmationCode : String
+  - /duration : Duration
+  + isActive() : Boolean
+  + overlaps(startTime : DateTime, endTime : DateTime) : Boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+
+Student "1" -- "0..*" Booking : makes >
+Room "1" -- "0..*" Booking : is reserved by >
+
+note right of Student
+  name is assumed for display only; no story
+  or rule requires it (registration is out of scope).
+  bookRoom() / cancelBooking() are NOT Student
+  operations — BookingService runs both workflows
+  (see sequence.puml). cancelBooking only succeeds
+  if the booking belongs to the requesting student.
+end note
+
+note right of Room
+  name is assumed for display only; no story or
+  rule requires it.
+  isAvailable(startTime, endTime) is the US-01 query:
+  false if blocked (R3) or any ACTIVE booking overlaps
+  (R2). The booking flow (sequence.puml) does NOT call
+  isAvailable() directly — it needs blocked/overlap as
+  separate reasons for its reply, so it uses isBlocked()
+  and each booking's overlaps() individually instead.
+  block() sets blocked = true only; existing ACTIVE
+  bookings are not changed (declared decision).
+end note
+
+note right of Booking
+  R1 (checked at creation only): startTime is after now,
+  and 0 < /duration <= 2 hours.
+  R2: active bookings for the same room may not overlap.
+  overlaps(startTime, endTime) compares this ACTIVE
+  booking against a candidate slot; a booking that ends
+  exactly when another begins is NOT an overlap.
+  CANCELLED bookings are excluded from the R2 check.
+  US-06 (usage review) is derived from existing Booking
+  data (startTime, endTime, status) filtered by period;
+  it needs no class of its own.
+end note
+@enduml

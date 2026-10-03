@@ -1,0 +1,43 @@
+schema: 1
+week: "04"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+
+counts:
+  behaviour_diagram: sequence
+  stories_source: week-03
+  use_cases: 6
+  change_log_rows: 4
+
+checker:
+  pass: 37
+  fail: 0
+  error: 0
+  commit: a7f3812
+  kept_fails: []
+
+assumptions:
+  overlap_touching_bookings: allowed
+  blocking_a_booked_room: keep-bookings
+
+traceability:
+  use_cases_not_traced: []
+  rules_not_shown: []
+
+review_findings:
+  - The class diagram's Booking.overlaps(other: Booking) could not actually be called by the sequence diagram, since the booking being checked against doesn't exist yet at that point — changed the signature to overlaps(startTime, endTime) so it can be called on each existing ACTIVE booking.
+  - Student.bookRoom() and Student.cancelBooking() in the class diagram conflicted with BookingService owning both workflows in the sequence diagram — removed them from Student and documented BookingService as the owner.
+  - R2 was only explained in the AI's surrounding chat text for the class diagram, never represented as a note on the diagram itself — added an explicit note on Booking stating R2 and the touching-bookings decision.
+  - The original sequence diagram merged R2 and R3 into a single OR'd alt branch, hiding which rule actually caused a rejection — split into two separately guarded branches so each rule is independently visible.
+
+honesty:
+  originals_unedited: yes
+  can_explain_everything_submitted: yes
+  ai_usage_disclosed: yes
