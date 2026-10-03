@@ -31,6 +31,8 @@ note right of UC3
 end note
 note right of UC4
   Rule: R3
+  Existing bookings are unaffected when a room is blocked
+  (declared decision).
 end note
 note right of UC5
   Rule: R3

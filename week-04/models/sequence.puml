@@ -25,27 +25,32 @@ else R1 satisfied
   BookingService -> BookingRepository : findActiveBookings(roomId)
   BookingRepository --> BookingService : activeBookings
   deactivate BookingRepository
-  note right
-    activeBookings is the raw ACTIVE set for this room.
-    Overlap itself is judged by Booking.overlaps(), per the
-    class diagram — the repository does not decide R2.
-  end note
 
   alt room is blocked (R3)
     BookingService --> Student : unavailable(reason = "room blocked")
-  else any booking in activeBookings overlaps the requested slot (R2, via booking.overlaps(requested))
-    BookingService --> Student : unavailable(reason = "time slot taken")
-  else neither R2 nor R3 applies
-    BookingService -> BookingService : createBooking(studentId, room, startTime, endTime)
+  else continue checking the request
+    BookingService -> BookingService : checkOverlap(activeBookings, startTime, endTime)
     note right
-      status = ACTIVE
-      confirmationCode generated (R4)
+      Calls booking.overlaps(startTime, endTime) on each
+      ACTIVE booking in activeBookings, per class.puml.
+      A booking that ends exactly when another begins is
+      NOT an overlap (declared decision).
     end note
-    BookingService -> BookingRepository : save(booking)
-    activate BookingRepository
-    BookingRepository --> BookingService : savedBooking
-    deactivate BookingRepository
-    BookingService --> Student : confirmation(bookingId, confirmationCode, roomId, startTime, endTime)
+
+    alt any booking.overlaps(startTime, endTime) is true (R2)
+      BookingService --> Student : unavailable(reason = "time slot taken")
+    else slot is free
+      BookingService -> BookingService : createBooking(studentId, room, startTime, endTime)
+      note right
+        status = ACTIVE
+        confirmationCode generated (R4)
+      end note
+      BookingService -> BookingRepository : save(booking)
+      activate BookingRepository
+      BookingRepository --> BookingService : savedBooking
+      deactivate BookingRepository
+      BookingService --> Student : confirmation(bookingId, confirmationCode, roomId, startTime, endTime)
+    end
   end
 end
 

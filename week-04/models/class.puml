@@ -6,8 +6,6 @@ hide empty members
 class Student {
   - studentId : String
   - name : String
-  + bookRoom(room : Room, start : DateTime, end : DateTime) : Booking
-  + cancelBooking(booking : Booking) : void
 }
 
 class Room {
@@ -17,7 +15,7 @@ class Room {
   + isBlocked() : Boolean
   + block() : void
   + unblock() : void
-  + isAvailable(start : DateTime, end : DateTime) : Boolean
+  + isAvailable(startTime : DateTime, endTime : DateTime) : Boolean
 }
 
 class Booking {
@@ -26,9 +24,9 @@ class Booking {
   - endTime : DateTime
   - status : BookingStatus
   - confirmationCode : String
-  + /duration : Duration
+  - /duration : Duration
   + isActive() : Boolean
-  + overlaps(other : Booking) : Boolean
+  + overlaps(startTime : DateTime, endTime : DateTime) : Boolean
   + cancel() : void
 }
 
@@ -40,14 +38,38 @@ enum BookingStatus {
 Student "1" -- "0..*" Booking : makes >
 Room "1" -- "0..*" Booking : is reserved by >
 
-Booking ..> BookingStatus
+note right of Student
+  name is assumed for display only; no story
+  or rule requires it (registration is out of scope).
+  bookRoom() / cancelBooking() are NOT Student
+  operations — BookingService runs both workflows
+  (see sequence.puml). cancelBooking only succeeds
+  if the booking belongs to the requesting student.
+end note
+
+note right of Room
+  name is assumed for display only; no story or
+  rule requires it.
+  isAvailable(startTime, endTime) is the US-01 query:
+  false if blocked (R3) or any ACTIVE booking overlaps
+  (R2). The booking flow (sequence.puml) does NOT call
+  isAvailable() directly — it needs blocked/overlap as
+  separate reasons for its reply, so it uses isBlocked()
+  and each booking's overlaps() individually instead.
+  block() sets blocked = true only; existing ACTIVE
+  bookings are not changed (declared decision).
+end note
 
 note right of Booking
+  R1 (checked at creation only): startTime is after now,
+  and 0 < /duration <= 2 hours.
   R2: active bookings for the same room may not overlap.
-  Checked via overlaps() against the room's other ACTIVE
-  bookings; CANCELLED bookings are excluded. A booking
-  that ends exactly when another begins is NOT an overlap
-  (Room.isAvailable() delegates this check to overlaps(),
-  not a duplicated comparison).
+  overlaps(startTime, endTime) compares this ACTIVE
+  booking against a candidate slot; a booking that ends
+  exactly when another begins is NOT an overlap.
+  CANCELLED bookings are excluded from the R2 check.
+  US-06 (usage review) is derived from existing Booking
+  data (startTime, endTime, status) filtered by period;
+  it needs no class of its own.
 end note
 @enduml

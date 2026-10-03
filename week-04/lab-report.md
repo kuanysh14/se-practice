@@ -70,50 +70,7 @@ Using the supplied scenario and approved stories, generate PlantUML for a use-ca
 ### 2.2 Task 2 — class prompt
 
 ```text
-@startuml
-title Smart Campus Study Room Booking - Domain Class Diagram
-skinparam classAttributeIconSize 0
-hide empty members
-
-class Student {
-  - studentId : String
-  - name : String
-  + bookRoom(room : Room, start : DateTime, end : DateTime) : Booking
-  + cancelBooking(booking : Booking) : void
-}
-
-class Room {
-  - roomId : String
-  - name : String
-  - blocked : Boolean
-  + isBlocked() : Boolean
-  + block() : void
-  + unblock() : void
-  + isAvailable(start : DateTime, end : DateTime) : Boolean
-}
-
-class Booking {
-  - bookingId : String
-  - startTime : DateTime
-  - endTime : DateTime
-  - status : BookingStatus
-  - confirmationCode : String
-  + /duration : Duration
-  + isActive() : Boolean
-  + overlaps(other : Booking) : Boolean
-  + cancel() : void
-}
-
-enum BookingStatus {
-  ACTIVE
-  CANCELLED
-}
-
-Student "1" -- "0..*" Booking : makes >
-Room "1" -- "0..*" Booking : is reserved by >
-
-Booking ..> BookingStatus
-@enduml
+Create a UML domain class diagram in PlantUML for Smart Campus. Start with Student, Room, and Booking. Add attributes, appropriate operations, and association multiplicities. Add other classes only when requirements justify them. Explain each relationship and list assumptions. Avoid unjustified inheritance or composition.
 ```
 
 ### 2.3 Task 3 — behaviour prompt (3A sequence or 3B activity)
@@ -217,18 +174,20 @@ One row per association in your **revised** class diagram.
 
 ## 7. Consistency table
 
+## 7. Consistency table
+
 | Requirement / story | Use case | Classes | Behaviour element |
 | --- | --- | --- | --- |
 | R1 | Book Room | Booking (startTime, /duration — note) | "R1 violated" / "R1 satisfied" alt guard; validateTimeSlot() |
 | R2 | Book Room, Cancel Own Booking | Booking.overlaps(startTime, endTime) — note | "any booking.overlaps(...) is true (R2)" alt guard |
 | R3 | Block Room, Unblock Room | Room.blocked, isBlocked() | "room is blocked (R3)" alt guard |
 | R4 | Book Room | Booking.confirmationCode | confirmation(...) reply on the success path |
-| US-01 | View Room Availability | Room.isAvailable(startTime, endTime) | not modeled in the sequence (out of scope for Book Room) |
-| US-02 | Book Room | Student, Room, Booking | the full sequence diagram |
-| US-03 | Cancel Own Booking | Student, Booking.cancel() | not modeled in the sequence (Book Room only; cancel has no behaviour diagram this lab) |
-| US-04 | Block Room | Room.block() | not modeled in the sequence |
-| US-05 | Unblock Room | Room.unblock() | not modeled in the sequence |
-| US-06 | Review Room Usage | Booking (derived — note) | not modeled in the sequence |
+| US-01 | View Room Availability\n(US-01) | Room.isAvailable(startTime, endTime) | not modeled in the sequence (out of scope for Book Room) |
+| US-02 | Book Room\n(US-02) | Student, Room, Booking | the full sequence diagram |
+| US-03 | Cancel Own Booking\n(US-03) | Student, Booking.cancel() | not modeled in the sequence (Book Room only) |
+| US-04 | Block Room\n(US-04) | Room.block() | not modeled in the sequence |
+| US-05 | Unblock Room\n(US-05) | Room.unblock() | not modeled in the sequence |
+| US-06 | Review Room Usage\n(US-06) | Booking (derived — note) | not modeled in the sequence |
 ---
 
 ## 8. Change log
