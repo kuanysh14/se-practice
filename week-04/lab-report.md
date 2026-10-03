@@ -70,7 +70,50 @@ Using the supplied scenario and approved stories, generate PlantUML for a use-ca
 ### 2.2 Task 2 — class prompt
 
 ```text
-<paste>
+@startuml
+title Smart Campus Study Room Booking - Domain Class Diagram
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Student {
+  - studentId : String
+  - name : String
+  + bookRoom(room : Room, start : DateTime, end : DateTime) : Booking
+  + cancelBooking(booking : Booking) : void
+}
+
+class Room {
+  - roomId : String
+  - name : String
+  - blocked : Boolean
+  + isBlocked() : Boolean
+  + block() : void
+  + unblock() : void
+  + isAvailable(start : DateTime, end : DateTime) : Boolean
+}
+
+class Booking {
+  - bookingId : String
+  - startTime : DateTime
+  - endTime : DateTime
+  - status : BookingStatus
+  - confirmationCode : String
+  + /duration : Duration
+  + isActive() : Boolean
+  + overlaps(other : Booking) : Boolean
+  + cancel() : void
+}
+
+enum BookingStatus {
+  ACTIVE
+  CANCELLED
+}
+
+Student "1" -- "0..*" Booking : makes >
+Room "1" -- "0..*" Booking : is reserved by >
+
+Booking ..> BookingStatus
+@enduml
 ```
 
 ### 2.3 Task 3 — behaviour prompt (3A sequence or 3B activity)
@@ -120,24 +163,26 @@ One row per association in your **revised** class diagram.
 
 | Association | Read left → right | Read right → left | Multiplicities |
 | --- | --- | --- | --- |
-| <Student — Booking> | <one student makes 0..* bookings> | <each booking belongs to exactly 1 student> | <1 / 0..*> |
-| <Room — Booking> | <...> | <...> | <...> |
+| Student — Booking | one Student makes 0..* Bookings | each Booking is made by exactly 1 Student | 1 / 0..* |
+| Room — Booking | one Room is reserved by 0..* Bookings | each Booking is for exactly 1 Room | 1 / 0..* |
 
 ### 4.2 Constraints the multiplicities cannot show
 
-- R2: <how your diagram states it — which note, on which class>
-- <any other rule that is not visible in multiplicities>
+- R2: the original AI reply explained R2's enforcement only in its prose (`Booking.overlaps()`), with nothing on the diagram itself — added a `note` on the `Booking` class in the revision stating the rule, that it applies to ACTIVE bookings only, and that touching bookings are not an overlap.
+- R1 (future start, ≤2h duration) and R3 (blocked room rejects booking) are not shown as notes — both are directly visible as typed attributes/operations instead (`startTime`/`endTime`/`/duration` on Booking; `blocked`/`isBlocked()` on Room), so a note would be redundant with what the diagram already states structurally.
 
 ### 4.3 Assumptions
 
-- A1: <an assumption you had to make — e.g. what happens to existing bookings when a room is blocked>
-- <A2 ...>
+- A1: Administrator is not a domain class — the requirements give it actions (block, unblock, review usage) but no data of its own, and nothing records who performed a block. It stays an actor only; would become a class if an audit trail were required.
+- A2: Confirmation is an attribute (`confirmationCode` on Booking), not its own class — the scenario gives it no data beyond "a confirmation is produced," and it's not reused elsewhere.
+- A3: What happens to existing bookings when a room is blocked — unaffected (declared in `approved-stories.md`); `block()` has no link to cancellation, consistent with that decision.
 
 ### 4.4 Findings
 
 | # | Element | Problem | Rule or story | Fix |
 | --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
+| 1 | Booking class (R2 enforcement) | R2 was explained only in the AI's surrounding prose, not represented anywhere on the diagram itself — a reader of the image alone would never know R2 exists | R2 ("active bookings for the same room cannot overlap") | Added a UML `note` on `Booking` stating R2 explicitly, including the touching-bookings decision |
+| 2 | Room.isAvailable() / Booking.overlaps() | Both methods appear to implement overlap-checking logic independently, risking duplicated or inconsistent comparison logic between the two | R2 | Documented in the new note that `isAvailable()` must delegate to `overlaps()` rather than reimplementing the comparison |
 
 ---
 
