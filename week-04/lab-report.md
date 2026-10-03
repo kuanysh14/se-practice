@@ -119,7 +119,7 @@ Booking ..> BookingStatus
 ### 2.3 Task 3 — behaviour prompt (3A sequence or 3B activity)
 
 ```text
-<paste>
+Generate PlantUML for Book room. Use Student, BookingService, and BookingRepository lifelines. Validate the supplied rules, then attempt the reservation. Show a successful confirmation and an unavailable-room alternative using alt. Label messages and replies. Explain new design components and all assumptions.
 ```
 
 ### 2.4 Focused correction prompts (if you sent any)
@@ -188,14 +188,14 @@ One row per association in your **revised** class diagram.
 
 ## 5. Task 3 — behaviour diagram review
 
-**Option chosen and why:** <3A sequence / 3B activity — one sentence on why>
+**Option chosen and why:** 3A sequence - maps cleanly to a single alt structure for the success/unavailable split, and makes R1/R2/R3's individual guard conditions easy to inspect directly on the diagram.
 
-**Design components added beyond the domain model:** <name each one, e.g. `BookingService` —
-what it does in one line; write "none" for an activity diagram>
+**Design components added beyond the domain model:** `BookingService` - coordinates the multi-step workflow (validate R1, check R3/R2, create, save, reply) that no single domain class owns. `BookingRepository` - isolates persistence of Room and Booking lookups/saves from the service logic, a design component, not a domain concept, so it correctly stays out of the Task 2 class diagram.
 
-| # | Element | Problem | Rule or story | Fix |
-| --- | --- | --- | --- | --- |
-| 1 | <element> | <problem> | <rule or story> | <fix> |
+| # | Element | Problem | Rule or story | Fix                                                                                                                                                                               |
+| --- | --- | --- | --- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1 | Inner `alt` guard: "room is blocked (R3) or overlaps an active booking (R2)" | Two distinct rules were merged into a single OR'd branch, so neither R2 nor R3 had its own individually-guarded path on the diagram | R2, R3 | Restructured into a three-way `alt`/`else`/`else`, giving R3 its own branch, R2 its own branch, and success its own branch - each rule is now independently visible and traceable |
+| 2 | `BookingRepository.findActiveBookings()` returning only "overlapping" bookings | Silently reimplements overlap-detection inside the repository, contradicting Task 2's class diagram, which assigns overlap logic to `Booking.overlaps()` | R2; class diagram `Booking.overlaps()` (Task 2, finding 2) | Repository now returns the raw active set, and a note makes explicit that `Booking.overlaps()` - not the repository - judges the overlap, keeping the two diagrams consistent     |
 
 ---
 
