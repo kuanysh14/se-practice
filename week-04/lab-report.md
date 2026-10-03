@@ -203,14 +203,51 @@ One row per association in your **revised** class diagram.
 
 ## 9. Checker output
 
-Paste the complete output of `python tests/check_models.py`, then explain **every FAIL you are
-keeping**. The same IDs go in `submission.yml` under `checker.kept_fails`. A FAIL you report and explain costs you nothing. One you hide costs the whole criterion.
-
 ```text
-<paste the full output>
+Week 04 structural check - shape only, never quality
+
+UC1  PASS  Student and Administrator declared
+UC2  PASS  named system boundary: "Smart Campus Study Room Booking System"
+UC3  PASS  all actors declared outside the boundary
+UC4  PASS  all scenario goals present (6 use cases)
+UC5  PASS  no actor is associated with a confirmation use case
+UC6  PASS  actor responsibilities match the scenario
+UC7  PASS  use cases are goals, not screens or components
+UC8  PASS  every include / extend / generalization carries a ' why: comment (or there are none)
+UC9  PASS  revised diagram differs from the AI's original
+CL1  PASS  Student, Room and Booking present
+CL2  PASS  Booking is associated with Student and with Room
+CL3  PASS  every association has multiplicities at both ends
+CL4  PASS  1 student / 1 room per booking, 0..* bookings per student and per room
+CL5  PASS  every inheritance / composition / aggregation carries a ' why: comment (or there are none)
+CL6  PASS  only domain concepts in the class diagram
+CL7  PASS  attributes needed by R1-R3 are present
+CL8  PASS  a note states R2 (no overlapping active bookings)
+SQ1  PASS  Student, BookingService and BookingRepository lifelines present
+SQ2  PASS  alt block with a guard on every branch (6 branches)
+SQ3  PASS  validation happens before creation
+SQ4  PASS  nothing is saved on a failure branch
+SQ5  PASS  every message is labelled
+SQ6  PASS  R1 (time range) is visible - checked or stated as a precondition
+SQ7  PASS  R3 (blocked room) is visible
+FI1  PASS  the AI's original output is kept for every diagram
+FI2  PASS  a rendered image for every diagram
+LR1  PASS  §1 setup filled (tool and model recorded)
+LR2  PASS  5 prompts pasted in §2
+LR3  PASS  2 use-case findings in §3
+LR4  PASS  §4 relationships read both ways, 3 assumption(s) declared
+LR5  PASS  2 behaviour-diagram findings in §5
+LR6  PASS  9 critique issues with a verdict
+LR7  PASS  4 change-log rows covering all three diagrams
+CS1  PASS  6 approved stories
+CS2  PASS  §7 traces R1-R4 into the diagrams
+CS3  PASS  every use case traces to an approved story
+CS4  PASS  every lifeline is a domain class or an explained design component
+
+SUMMARY pass=37 fail=0 error=0
 ```
 
-**FAILs I am keeping, and why:** <one line per check ID, or "none">
+**FAILs I am keeping, and why:** none — UC9, CL3, FI2 and SQ4 all failed on earlier runs (stale files and a guard-wording false positive on the word "overlap") and were fixed before this final run, not kept.
 
 ---
 
