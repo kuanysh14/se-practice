@@ -125,13 +125,13 @@ Generate PlantUML for Book room. Use Student, BookingService, and BookingReposit
 ### 2.4 Focused correction prompts (if you sent any)
 
 ```text
-<paste, or write "none">
+none
 ```
 
 ### 2.5 Critique prompt
 
 ```text
-<paste>
+Compare my diagrams with the requirements. Identify missing rules, inconsistent names, and unjustified elements. Cite each issue and propose a specific correction.
 ```
 
 ---
@@ -201,42 +201,44 @@ One row per association in your **revised** class diagram.
 
 ## 6. AI critique
 
-Run the critique prompt once, on all your revised diagrams together. At least **three** rows. A
-critique is another claim to evaluate, not a verdict: reject what is wrong and say why.
-
 | # | Issue the AI raised | Element it cited | Verdict | Why |
 | --- | --- | --- | --- | --- |
-| 1 | <issue> | <element> | <accept / reject> | <your reason> |
-| 2 | <issue> | <element> | <accept / reject> | <your reason> |
-| 3 | <issue> | <element> | <accept / reject> | <your reason> |
+| 1 | R1 never appears in class.puml, only R2 | Booking note | accept | True — only a R2 note existed. Added an R1 note on Booking (startTime in future, 0 < /duration <= 2h). |
+| 2 | Declared decision 2 (blocking leaves existing bookings unchanged) appears in none of the three files | UC4 note; Room note | accept | True — it was only in lab-report.md prose, never on a diagram. Added to both the UC4 note and a Room note. |
+| 3 | Parameter names differ: `start`/`end` on Student/Room operations vs. `startTime`/`endTime` on Booking and in the sequence | Student.bookRoom, Room.isAvailable | accept | Real inconsistency. Renamed every parameter to `startTime`/`endTime`. |
+| 4 | Sequence calls `booking.overlaps(requested)` on a Booking that doesn't exist yet — it's created later in the same flow | sequence.puml, booking.overlaps() | accept | Correct — a pre-creation call to an uncreated object's method is incoherent. Changed `overlaps()` to take `(startTime, endTime)` directly, called on each existing ACTIVE booking instead. |
+| 5 | Two different owners for the booking workflow: `Student.bookRoom()` in the class diagram vs. `BookingService.bookRoom()` in the sequence, with different parameters | Student, BookingService | accept | Real design conflict. Removed `bookRoom`/`cancelBooking` from Student — BookingService owns both workflows, matching the sequence diagram's own design. |
+| 6 | `Student.name` and `Room.name` are not required by any story or rule | Student, Room | accept (documented, not deleted) | Fair under this lab's "justify every element" standard. Kept both fields but added a note marking them as a display-only assumption rather than silently leaving them unjustified. |
+| 7 | `Booking ..> BookingStatus` dependency adds nothing since `status : BookingStatus` already shows the type | class.puml | accept | Redundant notation. Removed the arrow. |
+| 8 | `Room.isAvailable()` is documented as the R2/R3 check, but the sequence never calls it — it checks `isBlocked()` and overlap separately | Room.isAvailable(), sequence.puml | accept, with a different fix than suggested | The AI's own fix here was actually right: keep the separate checks (the booking flow needs distinct failure reasons; a single boolean from `isAvailable()` would hide whether blocking or overlap caused the rejection), and just reword the class note so `isAvailable()` is explicitly scoped to US-01 (View availability) rather than claimed as what the booking flow uses. |
+| 9 | R2 could race between the overlap check and `save()` — undrawn in the sequence | sequence.puml, R2 | reject | The AI flagged this itself as optional. It's already disclosed in Task 3's original assumptions ("save enforces R2 atomically... that race is not drawn separately"); drawing it would add a concurrency fragment the review questions never ask for, for a case already handled honestly in prose. |
 
 ---
 
 ## 7. Consistency table
 
-One row for each of **R1–R4**, then one row for **every use case in your revised use-case
-diagram**, spelled exactly as in the diagram, with the story ID it traces to.
-
 | Requirement / story | Use case | Classes | Behaviour element |
 | --- | --- | --- | --- |
-| R1 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R2 | <use case> | <classes, note> | <message, guard or decision> |
-| R3 | <use case> | <classes and attributes> | <message, guard or decision> |
-| R4 | <use case> | <classes> | <message or action> |
-| <US-01> | <Book room> | <Student, Booking, Room> | <message or action> |
-
+| R1 | Book Room | Booking (startTime, /duration — note) | "R1 violated" / "R1 satisfied" alt guard; validateTimeSlot() |
+| R2 | Book Room, Cancel Own Booking | Booking.overlaps(startTime, endTime) — note | "any booking.overlaps(...) is true (R2)" alt guard |
+| R3 | Block Room, Unblock Room | Room.blocked, isBlocked() | "room is blocked (R3)" alt guard |
+| R4 | Book Room | Booking.confirmationCode | confirmation(...) reply on the success path |
+| US-01 | View Room Availability | Room.isAvailable(startTime, endTime) | not modeled in the sequence (out of scope for Book Room) |
+| US-02 | Book Room | Student, Room, Booking | the full sequence diagram |
+| US-03 | Cancel Own Booking | Student, Booking.cancel() | not modeled in the sequence (Book Room only; cancel has no behaviour diagram this lab) |
+| US-04 | Block Room | Room.block() | not modeled in the sequence |
+| US-05 | Unblock Room | Room.unblock() | not modeled in the sequence |
+| US-06 | Review Room Usage | Booking (derived — note) | not modeled in the sequence |
 ---
 
 ## 8. Change log
 
-At least **three** rows, and at least one for each required diagram (use case, class, your
-behaviour diagram). "Before" is what the AI produced; "After" is what you submitted.
-
 | # | Diagram | Before (AI's original) | After (your revision) | Reason |
 | --- | --- | --- | --- | --- |
-| 1 | <use case> | <before> | <after> | <rule, story or notation reason> |
-| 2 | <class> | <before> | <after> | <reason> |
-| 3 | <sequence / activity> | <before> | <after> | <reason> |
+| 1 | use case | No mention of what happens to existing bookings when a room is blocked | Added to the UC4 note: "existing bookings are unaffected when a room is blocked" | Declared decision 2 was missing from every diagram (critique #2) |
+| 2 | class | `Booking ..> BookingStatus` dependency arrow; `+/duration` public; no R1 note; `overlaps(other : Booking)` | Arrow removed; `-/duration` private; R1 note added; `overlaps(startTime, endTime)` | Redundant notation, inconsistent visibility, missing rule, and an uncallable method signature (critique #1, #7, #10, #12) |
+| 3 | class | `Student.bookRoom()` / `Student.cancelBooking()` as Student operations | Removed from Student; note states BookingService owns both workflows | Conflicted with the sequence diagram's own design, where BookingService runs the workflow (critique #8) |
+| 4 | sequence | Inner alt merged R2 and R3 into one OR'd branch; guard referenced `booking.overlaps(requested)` on a not-yet-created Booking | Split into nested alts (R3 branch, then R2 branch, then success); overlap now checked via `checkOverlap()` calling each existing booking's `overlaps(startTime, endTime)` | Rules need individual guards to stay traceable (my own Task 3 review), and the original overlap call was logically incoherent (critique #7) |
 
 ---
 
