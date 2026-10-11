@@ -16,7 +16,7 @@ grader find your answers by them. Add rows to any table; never remove its header
 | |   |
 | --- |---|
 | Assistant (tool) | Claude |
-| **Exact** model name | Clause Sonnet 5.5 |
+| **Exact** model name | Claude Sonnet 5.5 |
 | Language and version | Python 3.14 |
 | Path | A |
 | My Week 04 declaration for touching bookings | allowed |
