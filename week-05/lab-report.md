@@ -207,7 +207,12 @@ If you meant to review a different version, one where something was changed, ple
 Paste the **complete** terminal output. For Python: everything `python -m unittest -v` printed.
 
 ```text
-(paste here)
+test_touching_end_is_allowed (test_booking.BookingTests.test_touching_end_is_allowed) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK
 ```
 
 ### 8.2 The checker, final run
@@ -216,7 +221,47 @@ Paste the **complete** output of `python tests/check_booking.py`. Paste it **las
 this file afterwards, run the checker again and paste again.
 
 ```text
-(paste here)
+
+Week 05 - can_book: the function, your tests, the evidence   (Path A)
+
+PASS   F1   the six cases from the task table           6 of 6 cases
+PASS   F2   AC1 time order and day bounds               5 of 5 cases
+PASS   F3   AC1 the start is in the future              5 of 5 cases
+PASS   F4   AC2 at most 120 minutes                     3 of 3 cases
+PASS   F5   AC3 a blocked room accepts nothing          2 of 2 cases
+PASS   F6   AC4 every kind of overlap is rejected       5 of 5 cases
+PASS   F7   AC4 touching endpoints are allowed          3 of 3 cases
+PASS   F8   AC4 every existing booking is checked       4 of 4 cases
+PASS   F9   AC5 the result is a real Boolean            3 of 3 cases
+PASS   F10  AC5 the inputs are left unchanged           2 of 2 cases
+PASS   O1   the assistant's first version is kept       v1 kept (27 lines)
+FAIL   S1   your suite has at least 11 tests            1 test - the task asks for the six table cases plus five more kinds (README Part 3)
+PASS   S2   your suite is green on your own code        1 tests, OK
+FAIL   M1   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
+FAIL   M2   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
+FAIL   M3   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
+FAIL   M4   your tests catch a fault in AC2             NOT caught - a can_book that breaks AC2 passed all 1 of your tests that follow the contract
+FAIL   M5   your tests catch a fault in AC3             NOT caught - a can_book that breaks AC3 passed all 1 of your tests that follow the contract
+PASS   M6   your tests catch a fault in AC4             caught by test_touching_end_is_allowed
+FAIL   M7   your tests catch a fault in AC4             NOT caught - a can_book that breaks AC4 passed all 1 of your tests that follow the contract
+FAIL   M8   your tests catch a fault in AC4             NOT caught - a can_book that breaks AC4 passed all 1 of your tests that follow the contract
+FAIL   M9   your tests catch a fault in AC5             NOT caught - a can_book that breaks AC5 passed all 1 of your tests that follow the contract
+FAIL   M10  your tests catch a fault in AC5             NOT caught - a can_book that breaks AC5 passed all 1 of your tests that follow the contract
+PASS   L1   report 1: tool, model and language          tool, model and language recorded
+PASS   L2   report 2: the plan, and what you corrected  plan pasted, 1 row(s) on what you corrected or verified
+PASS   L3   report 3: v1 mapped to AC1-AC4              6 conditions mapped, AC1-AC4 all present
+PASS   L4   report 4: at least 11 of your tests listed  30 tests listed
+PASS   L5   report 5: debugging evidence                1 row(s) of input / expected / actual
+PASS   L6   report 6: the critique, each point judged   critique pasted, 2 points judged
+PASS   L7   report 7: change log                        1 change-log row(s)
+PASS   L8   report 8.1: real output of your suite       suite output pasted
+FAIL   L9   report 10: conclusion of 120-180 words      section 10 has 0 words, the task asks for 120-180
+------------------------------------------------------------------------------
+v1 (code/original/booking_v1.py): passes F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 - fails nothing - identical to your final: yes
+SUMMARY pass=21 fail=11 error=0   (32 checks)
+Every FAIL or ERROR you keep goes in lab-report.md section 9 and in submission.yml known_fails.
+One you report and explain costs you nothing. One you hide costs the whole criterion.
+
 ```
 
 ### 8.3 Path B only — three faults I planted myself
