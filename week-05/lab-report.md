@@ -91,23 +91,24 @@ row saying which lines of the plan you checked against which AC.
 
 ## 3. Task 2 — the first version (v1), read before it was run
 
-v1 is saved as `code/original/booking_v1.<ext>`, exactly as the assistant returned it: yes / no
-
-**AC map.** One row per condition in v1. Quote the line.
+v1 is saved as `code/original/booking_v1.py`, exactly as the assistant returned it: yes
 
 | # | Line in v1 | AC it implements | Correct as written? If not, why |
-| --- | --- | --- | --- |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
+| --- | --- | --- |---|
+| 1 | `if not (0 <= start < end <= 1440): return False` | AC1 (range + day bounds) | Correct — verified by hand: `end==1440` passes (exclusive end), `start==end` fails, `start>end` fails |
+| 2 | `if start <= now: return False` | AC1 (start strictly after now) | Correct — `<=` (not `<`) correctly rejects `start==now`; confirmed `now=0, start=1` passes |
+| 3 | `if end - start > 120: return False` | AC2 | Correct, exactly 120 passes, 121 fails |
+| 4 | `if blocked: return False` | AC3 | Correct, unconditional, independent of any other check |
+| 5 | `for booked_start, booked_end in existing: if start < booked_end and booked_start < end: return False` | AC4 | Correct, standard half-open overlap test; by hand, touching case `(660,720)` vs `(600,660)`: `660<660` is False → no overlap → allowed, matching AC4 |
+| 6 | `return True` | AC5 | Correct, reached only after all four checks pass |
 
-**Anything in v1 that no AC asks for** (extra validation, a buffer between bookings, logging,
-saving the booking, a different return type):
+**Anything in v1 that no AC asks for:**
 
--
+- None found. No added validation, no buffer/gap logic, no sorting of `existing`, no logging, no change to the return type.
 
 ---
+
+## 4. Task 3 — my tests
 
 ## 4. Task 3 — my tests
 
@@ -115,57 +116,87 @@ Base input for every row unless the row says otherwise: `now=540, blocked=False,
 
 | # | Test name | Request (start, end) | What differs from the base input | Expected | AC | Result on v1 | Result on final |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | | |
-| 2 | | | | | | | |
-| 3 | | | | | | | |
-| 4 | | | | | | | |
-| 5 | | | | | | | |
-| 6 | | | | | | | |
-| 7 | | | | | | | |
-| 8 | | | | | | | |
-| 9 | | | | | | | |
-| 10 | | | | | | | |
-| 11 | | | | | | | |
+| 1 | test_touching_end_is_allowed | (660, 720) | — | True | AC4 | PASS | PASS |
+| 2 | test_overlap_is_rejected | (630, 690) | — | False | AC4 | PASS | PASS |
+| 3 | test_blocked_room_is_rejected | (660, 720) | blocked=True | False | AC3 | PASS | PASS |
+| 4 | test_exactly_two_hours_is_allowed | (720, 840) | — | True | AC2 | PASS | PASS |
+| 5 | test_over_two_hours_is_rejected | (720, 841) | — | False | AC2 | PASS | PASS |
+| 6 | test_starting_now_is_rejected | (540, 570) | — | False | AC1 | PASS | PASS |
+| 7 | test_zero_length_is_rejected | (700, 700) | — | False | AC1 | PASS | PASS |
+| 8 | test_reversed_interval_is_rejected | (720, 700) | — | False | AC1 | PASS | PASS |
+| 9 | test_negative_start_is_rejected | (-30, 30) | — | False | AC1 | PASS | PASS |
+| 10 | test_end_exactly_at_midnight_is_allowed | (1380, 1440) | — | True | AC1 | PASS | PASS |
+| 11 | test_end_past_midnight_is_rejected | (1380, 1441) | — | False | AC1 | PASS | PASS |
+| 12 | test_start_one_minute_after_now_is_allowed | (541, 571) | — | True | AC1 | PASS | PASS |
+| 13 | test_one_minute_booking_is_allowed | (720, 721) | — | True | AC2 | PASS | PASS |
+| 14 | test_blocked_with_no_existing_bookings | (660, 720) | blocked=True, existing=[] | False | AC3 | PASS | PASS |
+| 15 | test_overlap_on_the_start_side_is_rejected | (570, 630) | — | False | AC4 | PASS | PASS |
+| 16 | test_request_inside_existing_booking_is_rejected | (615, 645) | — | False | AC4 | PASS | PASS |
+| 17 | test_request_containing_existing_booking_is_rejected | (570, 690) | — | False | AC4 | PASS | PASS |
+| 18 | test_identical_interval_is_rejected | (600, 660) | — | False | AC4 | PASS | PASS |
+| 19 | test_touching_start_is_allowed | (570, 600) | — | True | AC4 | PASS | PASS |
+| 20 | test_fits_exactly_between_two_existing | (660, 720) | existing=[(600,660),(720,780)] | True | AC4 | PASS | PASS |
+| 21 | test_conflicts_with_the_second_of_two_existing | (720, 780) | existing=[(600,660),(700,760)] | False | AC4 | PASS | PASS |
+| 22 | test_conflict_found_in_an_unsorted_list | (610, 650) | existing=[(900,960),(600,660)] | False | AC4 | PASS | PASS |
+| 23 | test_empty_existing_list_is_allowed | (600, 660) | existing=[] | True | AC4 | PASS | PASS |
+| 24 | test_free_slot_among_three_existing | (760, 800) | existing=[(600,660),(700,760),(800,860)] | True | AC4 | PASS | PASS |
+| 25 | test_result_is_a_real_boolean_on_success | (660, 720) | — | isinstance bool | AC5 | PASS | PASS |
+| 26 | test_result_is_a_real_boolean_on_rejection | (630, 690) | — | isinstance bool | AC5 | PASS | PASS |
+| 27 | test_existing_is_unchanged_after_an_accepted_request | (780, 840) | existing=[(900,960),(600,660),(700,760)] | existing unchanged | AC5 | PASS | PASS |
+| 28 | test_existing_is_unchanged_after_a_rejected_request | (610, 650) | existing=[(900,960),(600,660),(700,760)] | existing unchanged | AC5 | PASS | PASS |
+| 29 | test_start_at_midnight_with_now_at_midnight_is_rejected | (0, 60) | now=0 | False | AC1 | PASS | PASS |
+| 30 | test_start_one_minute_after_midnight_with_now_at_midnight | (1, 61) | now=0 | True | AC1 | PASS | PASS |
 
 ---
 
 ## 5. Task 4 — debugging with evidence
 
-One row per defect you found — in v1, in a later version, or in your own tests. If v1 passed
-everything, the row is the **new edge case you added**, with expected and actual equal, and the
-cause column says why no change was needed.
-
 | # | Input (the full call) | Expected | Actual | Cause (quote the line) | Fix | Who proposed the fix |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | | | | | | |
+| 1 | `can_book(0, 60, 0, False, [(600, 660)])` | False | False | `if start <= now: return False` — `now=0` is the earliest possible value, and the plan itself noted "a booking starting at minute 0 can never be valid"; this case confirms it holds | none needed | n/a — added as a new edge case per README's rule for a v1 that already passes everything |
 
-**The debug prompt I sent, and the assistant's answer** (leave the block empty if you did not use it):
-
-```text
-```
+**The debug prompt I sent, and the assistant's answer:** (left empty — no debugging was needed; v1 passed F1–F10 and all 30 of my tests on the first run)
 
 ---
+
+## 6. Task 5 — the critique
 
 ## 6. Task 5 — the critique
 
 **The assistant's critique, pasted unedited:**
 
 ```text
-(paste here)
+I found no concrete issues. This code is identical to the version I gave you in booking.py, and I checked each line against the contract and AC1-AC5. I won't invent defects to fill the list of five.
+
+Criteria checked
+
+- AC1: `if not (0 <= start < end <= 1440):` covers the range, positive length, and the exclusive day end. `if start <= now:` makes the start strictly after `now`.
+- AC2: `if end - start > 120:` allows exactly 120 and rejects 121.
+- AC3: `if blocked:` rejects a blocked room.
+- AC4: `if start < booked_end and booked_start < end:` is the correct overlap test for half-open intervals. Touching endpoints give a false comparison, so they are allowed. Every booking is checked, so order and an empty list don't matter.
+- AC5: `return True` is reached only when every earlier check passed. The loop only reads `existing`, so it is never altered, and every path returns a Boolean.
+- Contract: the signature matches, nothing outside the standard library is used, and no inputs are mutated.
+
+Observations that are not violations
+
+- The docstring says "satisfies AC1-AC4", while AC5 is the return rule (True only when AC1-AC4 hold). This is consistent, so no change is needed.
+- `if blocked:` relies on truthiness. That is fine because the contract says `blocked` is a Boolean. A non-Boolean value would be outside the contract.
+
+If you meant to review a different version, one where something was changed, please paste that one. I can only report differences I can see, and this text has none.
 ```
 
 | # | Suggestion | accept / reject | Reason — cite the AC or the contract line | Suite after the change |
 | --- | --- | --- | --- | --- |
-| 1 | | accept / reject | | |
-| 2 | | accept / reject | | |
+| 1 | Docstring says "satisfies AC1-AC4" while AC5 is the return rule | reject | AC5 literally defines itself as "Return True only when AC1-AC4 hold" — so describing the earlier checks as the AC1-AC4 gate is accurate, not a defect. No contract line requires the docstring to restate AC5 too. | unchanged — 30/30, F1-F10 PASS |
+| 2 | `if blocked:` relies on truthiness rather than an explicit `is True` check | reject | The contract states "blocked is a Boolean", so the function is entitled to assume it. Nothing in AC1-AC5 asks for defensive type-checking on inputs the contract already guarantees — adding it would be unrequested scope, the same category of invention §2 was checking for in the plan. | unchanged — 30/30, F1-F10 PASS |
 
 ---
 
 ## 7. Change log — v1 to final
 
 | # | What changed (the line, before → after) | Why | Evidence: the test or check that moved |
-| --- | --- | --- | --- |
-| 1 | | | |
+| --- |---| --- | --- |
+| 1 | No code changed, v1 is identical to final | v1 passed F1–F10 on the checker's first run, and my 28-test suite (later 30) passed 100% against it with zero fixes needed | `check_booking.py`: F1–F10 all PASS on both v1 and final; M1–M10 all PASS, confirming the test suite is what demonstrates correctness |
 
 ---
 
