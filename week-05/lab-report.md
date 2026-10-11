@@ -252,7 +252,44 @@ Paste the **complete** output of `python tests/check_booking.py`. Paste it **las
 this file afterwards, run the checker again and paste again.
 
 ```text
+Week 05 - can_book: the function, your tests, the evidence   (Path A)
 
+PASS   F1   the six cases from the task table           6 of 6 cases
+PASS   F2   AC1 time order and day bounds               5 of 5 cases
+PASS   F3   AC1 the start is in the future              5 of 5 cases
+PASS   F4   AC2 at most 120 minutes                     3 of 3 cases
+PASS   F5   AC3 a blocked room accepts nothing          2 of 2 cases
+PASS   F6   AC4 every kind of overlap is rejected       5 of 5 cases
+PASS   F7   AC4 touching endpoints are allowed          3 of 3 cases
+PASS   F8   AC4 every existing booking is checked       4 of 4 cases
+PASS   F9   AC5 the result is a real Boolean            3 of 3 cases
+PASS   F10  AC5 the inputs are left unchanged           2 of 2 cases
+PASS   O1   the assistant's first version is kept       v1 kept (27 lines)
+PASS   S1   your suite has at least 11 tests            30 tests
+PASS   S2   your suite is green on your own code        30 tests, OK
+PASS   M1   your tests catch a fault in AC1             caught by test_start_at_midnight_with_now_at_midnight_is_rejected, test_starting_now_is_rejected
+PASS   M2   your tests catch a fault in AC1             caught by test_end_past_midnight_is_rejected
+PASS   M3   your tests catch a fault in AC1             caught by test_zero_length_is_rejected
+PASS   M4   your tests catch a fault in AC2             caught by test_exactly_two_hours_is_allowed
+PASS   M5   your tests catch a fault in AC3             caught by test_blocked_room_is_rejected, test_blocked_with_no_existing_bookings
+PASS   M6   your tests catch a fault in AC4             caught by test_fits_exactly_between_two_existing, test_free_slot_among_three_existing, test_touching_end_is_allowed and 1 more
+PASS   M7   your tests catch a fault in AC4             caught by test_conflict_found_in_an_unsorted_list, test_conflicts_with_the_second_of_two_existing
+PASS   M8   your tests catch a fault in AC4             caught by test_request_containing_existing_booking_is_rejected
+PASS   M9   your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_an_accepted_request
+PASS   M10  your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_a_rejected_request, test_existing_is_unchanged_after_an_accepted_request
+PASS   L1   report 1: tool, model and language          tool, model and language recorded
+PASS   L2   report 2: the plan, and what you corrected  plan pasted, 1 row(s) on what you corrected or verified
+PASS   L3   report 3: v1 mapped to AC1-AC4              6 conditions mapped, AC1-AC4 all present
+PASS   L4   report 4: at least 11 of your tests listed  30 tests listed
+PASS   L5   report 5: debugging evidence                1 row(s) of input / expected / actual
+PASS   L6   report 6: the critique, each point judged   critique pasted, 2 points judged
+PASS   L7   report 7: change log                        1 change-log row(s)
+PASS   L8   report 8.1: real output of your suite       suite output pasted
+PASS   L9   report 10: conclusion of 120-180 words      168 words
+------------------------------------------------------------------------------
+v1 (code/original/booking_v1.py): passes F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 - fails nothing - identical to your final: yes
+SUMMARY pass=32 fail=0 error=0   (32 checks)
+Behaviour and shape are clean. This says nothing about the quality of your review.
 
 
 ```
