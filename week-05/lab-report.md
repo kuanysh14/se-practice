@@ -207,10 +207,39 @@ If you meant to review a different version, one where something was changed, ple
 Paste the **complete** terminal output. For Python: everything `python -m unittest -v` printed.
 
 ```text
+test_blocked_room_is_rejected (test_booking.BookingTests.test_blocked_room_is_rejected) ... ok
+test_blocked_with_no_existing_bookings (test_booking.BookingTests.test_blocked_with_no_existing_bookings) ... ok
+test_conflict_found_in_an_unsorted_list (test_booking.BookingTests.test_conflict_found_in_an_unsorted_list) ... ok
+test_conflicts_with_the_second_of_two_existing (test_booking.BookingTests.test_conflicts_with_the_second_of_two_existing) ... ok
+test_empty_existing_list_is_allowed (test_booking.BookingTests.test_empty_existing_list_is_allowed) ... ok
+test_end_exactly_at_midnight_is_allowed (test_booking.BookingTests.test_end_exactly_at_midnight_is_allowed) ... ok
+test_end_past_midnight_is_rejected (test_booking.BookingTests.test_end_past_midnight_is_rejected) ... ok
+test_exactly_two_hours_is_allowed (test_booking.BookingTests.test_exactly_two_hours_is_allowed) ... ok
+test_existing_is_unchanged_after_a_rejected_request (test_booking.BookingTests.test_existing_is_unchanged_after_a_rejected_request) ... ok
+test_existing_is_unchanged_after_an_accepted_request (test_booking.BookingTests.test_existing_is_unchanged_after_an_accepted_request) ... ok
+test_fits_exactly_between_two_existing (test_booking.BookingTests.test_fits_exactly_between_two_existing) ... ok
+test_free_slot_among_three_existing (test_booking.BookingTests.test_free_slot_among_three_existing) ... ok
+test_identical_interval_is_rejected (test_booking.BookingTests.test_identical_interval_is_rejected) ... ok
+test_negative_start_is_rejected (test_booking.BookingTests.test_negative_start_is_rejected) ... ok
+test_one_minute_booking_is_allowed (test_booking.BookingTests.test_one_minute_booking_is_allowed) ... ok
+test_over_two_hours_is_rejected (test_booking.BookingTests.test_over_two_hours_is_rejected) ... ok
+test_overlap_is_rejected (test_booking.BookingTests.test_overlap_is_rejected) ... ok
+test_overlap_on_the_start_side_is_rejected (test_booking.BookingTests.test_overlap_on_the_start_side_is_rejected) ... ok
+test_request_containing_existing_booking_is_rejected (test_booking.BookingTests.test_request_containing_existing_booking_is_rejected) ... ok
+test_request_inside_existing_booking_is_rejected (test_booking.BookingTests.test_request_inside_existing_booking_is_rejected) ... ok
+test_result_is_a_real_boolean_on_rejection (test_booking.BookingTests.test_result_is_a_real_boolean_on_rejection) ... ok
+test_result_is_a_real_boolean_on_success (test_booking.BookingTests.test_result_is_a_real_boolean_on_success) ... ok
+test_reversed_interval_is_rejected (test_booking.BookingTests.test_reversed_interval_is_rejected) ... ok
+test_start_at_midnight_with_now_at_midnight_is_rejected (test_booking.BookingTests.test_start_at_midnight_with_now_at_midnight_is_rejected) ... ok
+test_start_one_minute_after_midnight_with_now_at_midnight (test_booking.BookingTests.test_start_one_minute_after_midnight_with_now_at_midnight) ... ok
+test_start_one_minute_after_now_is_allowed (test_booking.BookingTests.test_start_one_minute_after_now_is_allowed) ... ok
+test_starting_now_is_rejected (test_booking.BookingTests.test_starting_now_is_rejected) ... ok
 test_touching_end_is_allowed (test_booking.BookingTests.test_touching_end_is_allowed) ... ok
+test_touching_start_is_allowed (test_booking.BookingTests.test_touching_start_is_allowed) ... ok
+test_zero_length_is_rejected (test_booking.BookingTests.test_zero_length_is_rejected) ... ok
 
 ----------------------------------------------------------------------
-Ran 1 test in 0.001s
+Ran 30 tests in 0.019s
 
 OK
 ```
@@ -221,6 +250,7 @@ Paste the **complete** output of `python tests/check_booking.py`. Paste it **las
 this file afterwards, run the checker again and paste again.
 
 ```text
+
 
 Week 05 - can_book: the function, your tests, the evidence   (Path A)
 
@@ -235,18 +265,18 @@ PASS   F8   AC4 every existing booking is checked       4 of 4 cases
 PASS   F9   AC5 the result is a real Boolean            3 of 3 cases
 PASS   F10  AC5 the inputs are left unchanged           2 of 2 cases
 PASS   O1   the assistant's first version is kept       v1 kept (27 lines)
-FAIL   S1   your suite has at least 11 tests            1 test - the task asks for the six table cases plus five more kinds (README Part 3)
-PASS   S2   your suite is green on your own code        1 tests, OK
-FAIL   M1   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
-FAIL   M2   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
-FAIL   M3   your tests catch a fault in AC1             NOT caught - a can_book that breaks AC1 passed all 1 of your tests that follow the contract
-FAIL   M4   your tests catch a fault in AC2             NOT caught - a can_book that breaks AC2 passed all 1 of your tests that follow the contract
-FAIL   M5   your tests catch a fault in AC3             NOT caught - a can_book that breaks AC3 passed all 1 of your tests that follow the contract
-PASS   M6   your tests catch a fault in AC4             caught by test_touching_end_is_allowed
-FAIL   M7   your tests catch a fault in AC4             NOT caught - a can_book that breaks AC4 passed all 1 of your tests that follow the contract
-FAIL   M8   your tests catch a fault in AC4             NOT caught - a can_book that breaks AC4 passed all 1 of your tests that follow the contract
-FAIL   M9   your tests catch a fault in AC5             NOT caught - a can_book that breaks AC5 passed all 1 of your tests that follow the contract
-FAIL   M10  your tests catch a fault in AC5             NOT caught - a can_book that breaks AC5 passed all 1 of your tests that follow the contract
+PASS   S1   your suite has at least 11 tests            30 tests
+PASS   S2   your suite is green on your own code        30 tests, OK
+PASS   M1   your tests catch a fault in AC1             caught by test_start_at_midnight_with_now_at_midnight_is_rejected, test_starting_now_is_rejected
+PASS   M2   your tests catch a fault in AC1             caught by test_end_past_midnight_is_rejected
+PASS   M3   your tests catch a fault in AC1             caught by test_zero_length_is_rejected
+PASS   M4   your tests catch a fault in AC2             caught by test_exactly_two_hours_is_allowed
+PASS   M5   your tests catch a fault in AC3             caught by test_blocked_room_is_rejected, test_blocked_with_no_existing_bookings
+PASS   M6   your tests catch a fault in AC4             caught by test_fits_exactly_between_two_existing, test_free_slot_among_three_existing, test_touching_end_is_allowed and 1 more
+PASS   M7   your tests catch a fault in AC4             caught by test_conflict_found_in_an_unsorted_list, test_conflicts_with_the_second_of_two_existing
+PASS   M8   your tests catch a fault in AC4             caught by test_request_containing_existing_booking_is_rejected
+PASS   M9   your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_an_accepted_request
+PASS   M10  your tests catch a fault in AC5             caught by test_existing_is_unchanged_after_a_rejected_request, test_existing_is_unchanged_after_an_accepted_request
 PASS   L1   report 1: tool, model and language          tool, model and language recorded
 PASS   L2   report 2: the plan, and what you corrected  plan pasted, 1 row(s) on what you corrected or verified
 PASS   L3   report 3: v1 mapped to AC1-AC4              6 conditions mapped, AC1-AC4 all present
@@ -258,7 +288,7 @@ PASS   L8   report 8.1: real output of your suite       suite output pasted
 FAIL   L9   report 10: conclusion of 120-180 words      section 10 has 0 words, the task asks for 120-180
 ------------------------------------------------------------------------------
 v1 (code/original/booking_v1.py): passes F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 - fails nothing - identical to your final: yes
-SUMMARY pass=21 fail=11 error=0   (32 checks)
+SUMMARY pass=31 fail=1 error=0   (32 checks)
 Every FAIL or ERROR you keep goes in lab-report.md section 9 and in submission.yml known_fails.
 One you report and explain costs you nothing. One you hide costs the whole criterion.
 
@@ -288,23 +318,46 @@ The three failing runs (Path A students leave this block empty):
 The same IDs as `known_fails` in `submission.yml`. Write `none` if the run is clean.
 
 | Check | Why it stays |
-| --- | --- |
-| | |
+|-------| --- |
+| none  | |
 
 ### 9.2 Outside the contract
 
 The contract says times are integers. It does not say what `can_book` does when one is not —
 `600.5`, or the string `"600"`. What does **your** function do, and why is that the right call?
 
--
+```
+-**What it does now**
+
+- `600.5` (a float): no error. Python compares it like any number, so the function can return `True` for a slot that starts at a half minute.
+- `"600"` (a string): it raises `TypeError` on the first comparison, because Python 3 won't compare a string with an integer.
+
+**Why that is acceptable**
+
+The contract says times are integers, so anything else is a bug in the caller, not a booking request. Adding type checks would go beyond the stated scope, and I would have to invent a rule the contract doesn't give, such as whether `600.0` counts as valid.
+
+The string case is the safer one, because it fails loudly and the bug gets found. The float case is the weaker spot, because it passes silently. If the full system can ever send non-integers, the better fix is to validate at the system boundary, before `can_book` is called. If you want it inside `can_book`, tell me what it should return for those inputs (`False` is the likely choice) and I will add it as a separate change.
+
+```
 
 ### 9.3 A bound that never decides
 
 One of the bounds written in AC1 can never be the *only* reason a request is rejected. Which one,
 and why?
 
--
+```
+-It is `0 <= start`.
 
+`now` is valid, so `now >= 0`. If `start > now`, then `start` is at least 1, so `start >= 0` is always true. A request with `start < 0` already fails `start > now`, which means the `0 <=` bound is never the only reason for a rejection.
+
+The other bounds can each be the only reason:
+
+- `start < end`: `start=700, end=700` with `now=0` fails only here.
+- `end <= 1440`: `start=1400, end=1441` with `now=0` fails only here (the duration is 41).
+- `start > now`: `start=600, end=660, now=600` fails only here.
+
+I still keep `0 <= start` in the code. It costs nothing, it matches AC1 as written, and it protects the range check if the `now` rule ever changes.
+```
 ---
 
 ## 10. Conclusion (120–180 words)
@@ -320,3 +373,10 @@ and why?
      side, so a booking that ends exactly when another begins was rejected." -->
 
 <!-- Write your conclusion below this line -->
+
+a) Two bookings overlap only if each one starts before the other one ends, which is exactly what `start < booked_end and booked_start < end` checks. Since the end minute is excluded, a booking that ends at 660 does not use minute 660, so a new booking starting at 660 gives `660 < 660`, which is false, and the whole condition fails, meaning no overlap. The same happens when a new booking ends at 600 and an existing one starts at 600. That is why the comparisons are strict `<` and not `<=`: using `<=` would wrongly reject bookings that only touch.
+
+b) No test of mine ever caught a real bug, because the first version of the function was already correct, so the gap that lasted longest was in my tests: the now value. In every one of my tests now is 540 (09:00), except the last two, which use now=0 and were added only after everything else already passed. Every earlier test picked a boundary on the request side (start, end, length, overlap) and left now fixed at one comfortable mid-day value, so a version that broke only when now == 0, such as one that treated zero as “no value”, would have passed all 28 earlier tests. The missing test had the same shape as the others, a boundary check, but on the one input I never varied.
+
+c) The contract says times are integers, but it does not say what can_book should do with 600.5 or "600", and AC1-AC5 do not settle it. The assistant explained the behavior: a float passes silently and a string raises TypeError. It did not decide whether that was acceptable, so I did. I chose to leave inputs unchecked (not-handled) and not add an isinstance check. My reason is that a check would invent a rule that is not in the contract, for example whether 600.0 counts as valid and whether the answer should be False or an error. A string already fails loudly. A float passes silently, and I accept that risk. If non-integers can really reach this function, the better place to check is at the system boundary, before can_book is called.
+
