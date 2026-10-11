@@ -31,20 +31,61 @@ grader find your answers by them. Add rows to any table; never remove its header
 **The assistant's plan, pasted unedited:**
 
 ```text
-(paste here)
+## Implementation plan for `can_book`
+
+**Checks, in order (return `False` at the first failure, otherwise `True`):**
+
+1. **Range (AC1):** `0 <= start < end <= 1440`.
+2. **Not in the past (AC1):** `start > now` (strict).
+3. **Duration (AC2):** `end - start <= 120`.
+4. **Blocked (AC3):** if `blocked` is true, return `False`.
+5. **Overlap (AC4):** scan `existing` and reject if any `(s, e)` satisfies `start < e and s < end`. This works with the half-open rule, so touching endpoints don't count as overlap.
+6. **Otherwise:** return `True`.
+
+The cheap, fixed checks run first and the loop over `existing` runs last. The checks are independent, so the order doesn't change the result, only the work done. The function only reads `existing` and never sorts, appends, or removes (AC5).
+
+**Assumptions**
+
+- All inputs are integers, and `blocked` is a real Boolean.
+- Each tuple in `existing` is valid (`s < e`, within 0-1440), as the contract states, so I won't re-validate it.
+- `existing` may be empty, unsorted, or contain bookings that don't relate to each other, so the overlap check can't depend on order.
+- A zero-length or reversed request (`start >= end`) is simply invalid, not an error, and returns `False` rather than raising.
+- Because `start > now` is strict and `now >= 0`, a booking starting at minute 0 can never be valid.
+- Exactly 120 minutes is allowed; 121 is not.
 ```
+**Boundary cases to test**
+
+| Area | Cases |
+|---|---|
+| Range | `start=-1`; `start == end`; `start > end`; `end=1440` (valid) vs `end=1441` (invalid); `start=0` (always `False`); `start=1439, end=1440, now=1438` (`True`) |
+| Now | `start == now` (`False`); `start == now + 1` (`True`) |
+| Duration | 120 minutes (`True`); 121 minutes (`False`); `1320 -> 1440` (`True`, combines the duration and day-end limits) |
+| Blocked | Otherwise-valid request with `blocked=True` (`False`) |
+| Touching | Existing `(600, 660)`: new `(660, 720)` and `(540, 600)` both `True` |
+| Overlap | One-minute overlap on either side; new inside existing; new containing existing; identical interval |
+| Existing list | Empty list; several unsorted bookings where only the last one conflicts (catches early returns or checking only the first item); a gap between two bookings that fits exactly |
+| Immutability | Compare `existing` to a copy before and after the call, including after a `False` result |
+
+
+
+
 
 **What the plan invented or changed.** One row for every rule in the plan that is not in the
 contract or in AC1–AC5, or that says something different from them. If you found none, write one
 row saying which lines of the plan you checked against which AC.
 
-| # | What the plan said | What the contract or the AC says | What I did |
-| --- | --- | --- | --- |
-| 1 | | | |
+| # | What the plan said | What the contract or the AC says| What I did |
+| --- | --- |---|---|
+| 1 | Checked every step (range, start>now, duration, blocked, overlap formula, immutability) against AC1–AC5 and the contract one by one | Each step traces to exactly one AC or a contract-stated guarantee (existing tuples are pre-validated), no step introduces a rule not already in the spec | Kept the plan as it is, no corrections needed |
 
 **Boundary cases the assistant suggested that I kept as tests:**
 
--
+- `start=0` (always False, since `now>=0`)
+- Exactly 120 minutes vs 121 minutes
+- Touching on both sides: new booking right after, and right before, an existing one
+- Unsorted `existing` where only the last entry conflicts
+- A gap between two existing bookings that exactly fits a new request
+- Immutability check: compare `existing` before/after, including after a `False` result
 
 ---
 
