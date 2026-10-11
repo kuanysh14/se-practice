@@ -1,0 +1,43 @@
+schema: 1
+week: "05"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+
+language:
+  name: python
+  path: A
+
+counts:
+  tests: 30
+  v1_changed: no
+  change_log_rows: 1
+
+checker:
+  pass: 32
+  fail: 0
+  error: 0
+  commit: 73b7d3b
+  known_fails: []
+
+assumptions:
+  non_integer_time: not-handled
+
+carried:
+  week04_touching: allowed
+
+review_findings:
+  - "Critique: 'if blocked' relies on truthiness - rejected, AC3/contract already guarantee blocked is a Boolean, so no AC asks for extra type validation"
+  - "M1-M10 all PASS: my 30 tests catch every one of the checker's ten planted faults across AC1-AC5"
+  - "9.3: AC1's 0<=start bound can never be the sole reason for rejection - since now>=0 always holds, any start<0 already fails start>now first (test_negative_start_is_rejected)"
+
+honesty:
+  v1_unedited: yes
+  can_explain_overlap_without_ai: yes
+  ai_usage_disclosed: yes
