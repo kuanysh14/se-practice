@@ -89,16 +89,15 @@ no way to set up the case). Save each final run as `evidence/final-T<n>.png`.
 
 | # | Case | What you set up and request | Expected | AC | Result on v1 | Result on final | Final screenshot |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | Touching | 11:00–12:00 | Available | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T1.png |
-| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T2.png |
-| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T3.png |
-| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T4.png |
-| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T5.png |
-| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T6.png |
-| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T7.png |
-| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T8.png |
-| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Available / Unavailable / Not testable | Available / Unavailable / Not testable | final-T9.png |
-
+| T1 | Touching | 11:00–12:00 | Available | AC4 | Unavailable | Available / Unavailable / Not testable | final-T1.png |
+| T2 | Overlap | 10:30–11:30 | Unavailable | AC4 | Unavailable | Available / Unavailable / Not testable | final-T2.png |
+| T3 | Blocked | 11:00–12:00, room blocked | Unavailable | AC3 | Not testable | Available / Unavailable / Not testable | final-T3.png |
+| T4 | Exactly 2 hours | 12:00–14:00 | Available | AC2 | Unavailable | Available / Unavailable / Not testable | final-T4.png |
+| T5 | Over 2 hours | 12:00–14:01 | Unavailable | AC2 | Unavailable | Available / Unavailable / Not testable | final-T5.png |
+| T6 | Starts now | 09:00–09:30 (current time 09:00) | Unavailable | AC1 | Not testable | Available / Unavailable / Not testable | final-T6.png |
+| T7 | Reversed times | 12:00–11:00, and the page says why | Unavailable | AC1, AC6 | Unavailable | Available / Unavailable / Not testable | final-T7.png |
+| T8 | Same check twice | T1, then T1 again without reloading | Available | AC5 | Unavailable | Available / Unavailable / Not testable | final-T8.png |
+| T9 | Narrow screen | T1 at about 375 px wide | Available | AC6 | Unavailable | Available / Unavailable / Not testable | final-T9.png |
 ---
 
 ## 5. Issue log — cleanup targets
@@ -110,8 +109,8 @@ log a justified cleanup that preserves behaviour. Save a screenshot of each as
 
 | # | Issue | Evidence: steps → expected → observed | Priority | Decision |
 | --- | --- | --- | --- | --- |
-| 1 | | | High / Medium / Low | Fix / Reject / Defer |
-| 2 | | | High / Medium / Low | Fix / Reject / Defer |
+| 1 | Missing supplied current-time input, unselectable blocked room, and extra booking on Beacon Room (`Clock.tsx`, `RoomList.tsx`, `sampleData.ts`) | Set up base case (current time 09:00, Beacon Room with only 10:00–11:00 booked) and test T1 (11:00–12:00), T3 (blocked room 11:00–12:00), and T6 (09:00–09:30 at 09:00) → AC1 and AC3 expect T1/T4/T8/T9 Available and T3/T6 Unavailable → `Clock.tsx` locks current time to `new Date()` (~17:09) so T6 is Not testable and T1/T4/T8/T9 return Unavailable, while `RoomList.tsx` sets `disabled={room.blocked}` on Cedar Seminar Room so T3 is Not testable | High | Fix |
+| 2 | Raw-minute overlap message, generic reversed-time feedback, duplicated `nowToMinutes`, and unused `@supabase/supabase-js` in `package.json` (`availability.ts`, `Clock.tsx`, `package.json`) | Enter overlapping slot 10:30–11:30 (T2) or reversed slot 12:00–11:00 (T7) on Beacon Room and inspect source → AC6 and scope expect clear human-readable HH:MM feedback and no database/backend packages → `availability.ts` displays `(600–660 min)` instead of `10:00–11:00` and a raw inequality message for reversed times, `nowToMinutes()` is duplicated in `App.tsx` and `Clock.tsx`, and `package.json` lists `@supabase/supabase-js` | Medium | Fix |
 
 ---
 
