@@ -17,7 +17,7 @@ grader find your answers by them. Add rows to any table; never remove its header
 | --- |---|
 | Tool | Bolt.new |
 | Exact model (as Bolt shows it, or `not displayed`) | not displayed |
-| Bolt project link (or `not shared`, and why) |   |
+| Bolt project link (or `not shared`, and why) | https://bolt.new/p/72116215  |
 | Browser and version | Google Chrome (Desktop) |
 | If you could not use Bolt.new: the tool you used instead, and why | none |
 
@@ -29,9 +29,9 @@ grader find your answers by them. Add rows to any table; never remove its header
 Fill the first three columns now; fill the last one after Task 3.
 
 | # | What I expect to go wrong | AC it concerns | Was I right? (after Task 3) |
-| --- | --- | --- | --- |
-| 1 | v1 will either hardcode the current time / use the live system clock instead of providing a supplied current-time input, or fail to reject a booking where `start == current_time` (such as 09:00–09:30 when current time is 09:00). | AC1 | |
-| 2 | v1 will either include a "Book" button that mutates the existing booking list during checks (causing a second identical check to return Unavailable) or fail to allow touching endpoints (`end == existing.start` or `start == existing.end`, like 11:00–12:00 after a 10:00–11:00 booking). | AC4, AC5 | |
+| --- | --- | --- |---|
+| 1 | v1 will hardcode the current time or use the live system clock (`new Date()`) instead of providing a supplied current-time input, preventing us from setting current time to 09:00 for T1–T9 and T6. | AC1 | Yes, `Clock.tsx` and `App.tsx` read `new Date()` with no input to set the supplied current time to 09:00, making T6 Not testable and rejecting daytime slots when tested in the afternoon. |
+| 2 | v1 will either mutate bookings on check or mishandle room/interval setup (such as disabling blocked rooms in the UI or misformatting validation feedback). | AC3, AC4, AC5, AC6 | Partially, v1 did not mutate bookings (AC5 held) and allowed touching endpoints (AC4 held), but `RoomList.tsx` set `disabled={room.blocked}` on Cedar Seminar Room so T3 was Not testable, and `availability.ts` displayed overlap intervals in raw minutes (`600–660 min`). |
 
 **The initial prompt exactly as I sent it** — the deck's prompt with AC1–AC6 pasted in place of
 `[paste AC1–AC6]`, nothing else changed:
@@ -51,17 +51,26 @@ Use fictional sample data only. Keep the implementation simple and within one-pa
 ## 3. Task 2 — prototype v1
 
 v1 export saved in `original/` and screenshot saved as `evidence/v1.png` **before** any cleanup
-prompt: yes / no
+prompt: yes
 
 **Bolt's list of the files/components it created, pasted unedited:**
 
 ```text
-(paste here)
+Main files created
+- src/lib/availability.ts — the availability-check logic and types (all the acceptance criteria live here).
+- src/lib/time.ts — minute/HH:MM conversion helpers.
+- src/data/sampleData.ts — fictional sample rooms with pre-set bookings.
+- src/components/Clock.tsx, RoomList.tsx, IntervalForm.tsx, DecisionCard.tsx, BookingTimeline.tsx — the UI pieces.
+- src/App.tsx — the page that wires them together.
 ```
 
 **What v1 does — one line per thing that works, or visibly does not:**
 
--
+- Renders four sample campus rooms (`Aurora Hall`, `Beacon Room`, `Cedar Seminar Room`, and `Driftwood Lounge`) with a 24-hour visual booking timeline and read-only in-memory state that never mutates existing bookings on check (AC5 works).
+- Evaluates candidate start and end times immediately as the user types in `IntervalForm.tsx` and shows an `Available` or `Unavailable` card with rejection reasons in `DecisionCard.tsx`.
+- Locks `Current time` in `Clock.tsx` to the browser's live clock (`new Date()`) with no input to set the supplied current time to `09:00` (breaking T6 setup and causing pre-current-time rejections when tested after 09:00).
+- Disables clicking blocked rooms in `RoomList.tsx` (`disabled={room.blocked}` on `Cedar Seminar Room`), making it impossible to select a blocked room in the UI to test T3 (AC3).
+- Formats overlapping booking intervals in `availability.ts` as raw minutes after midnight (`600–660 min`) instead of `HH:MM` (`10:00–11:00`) and includes an unused `@supabase/supabase-js` dependency in `package.json`.
 
 **Repair prompt** (only if the first build did not run — the deck allows one, then the result is
 v1). Leave empty if you did not need it:
