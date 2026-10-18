@@ -1,0 +1,35 @@
+schema: 1
+assignment: "sis-02"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  group: Monday 18:00-19:00
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+
+checker:
+  pass: 44
+  fail: 0
+  error: 0
+  commit: 9be3a12
+
+counts:
+  stories: 3
+  criteria: 6
+  exchanges: 4
+  review_decisions: 4
+  source_checks: 2
+  explanation_words: 254
+  reflection_words: 177
+
+walkthroughs:
+  T1: "pass"
+  T2: "pass"
+  T3: "pass"
+  T4: "pass"
+
+known_fails: []

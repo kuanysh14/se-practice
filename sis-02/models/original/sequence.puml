@@ -1,0 +1,50 @@
+@startuml
+title Course registration: catalog, success, course full, already enrolled
+
+actor Student
+participant "Registration UI" as UI <<technical>>
+participant "RegistrationService" as Svc <<technical>>
+database "Enrollment Store" as Store <<technical>>
+
+== Catalog browsing (R1; AC-01, AC-02) ==
+Student -> UI : openCatalog(semester)
+UI -> Svc : getCatalog(semester)
+Svc -> Store : readOfferings(semester)
+Store --> Svc : course code, title, offering,\ncapacity, enrolled count
+Svc --> UI : rows with availablePlaces =\ncapacity - enrolled count
+UI --> Student : catalog (no place reserved)
+note right of Store
+  Read only. Nothing is reserved
+  and the enrollment count is unchanged.
+end note
+
+== Registration (R2, R3, R4, R5; AC-03 to AC-06) ==
+Student -> UI : register(offering)
+UI -> Svc : register(studentId, offeringId)
+
+group One atomic operation: final checks + enrollment creation
+  Svc -> Store : find enrollment(studentId, offeringId)
+  Store --> Svc : exists / does not exist
+  alt already enrolled (R3, R5, AC-06)
+    Svc --> UI : rejected("already enrolled")
+    note right of Store : no Enrollment created, count unchanged
+  else not yet enrolled
+    Svc -> Store : read capacity and current enrolled count
+    Store --> Svc : capacity, enrolled count
+    alt enrolled count >= capacity (R2, R5, AC-04, AC-05)
+      Svc --> UI : rejected("course full")
+      note right of Store : no Enrollment created, count unchanged
+    else a place is available (R2, R4, AC-03)
+      Svc -> Store : create Enrollment(studentId, offeringId)
+      Store --> Svc : Enrollment
+      Svc --> UI : confirmation(Enrollment, updated availablePlaces)
+    end
+  end
+end
+
+UI --> Student : confirmation or rejection reason
+note over Svc, Store
+  Competing requests for the last place are serialized by the atomic
+  operation. The second one sees the offering as full (AC-04).
+end note
+@enduml
