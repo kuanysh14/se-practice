@@ -1,20 +1,9 @@
-# week-06/submission.yml — your declaration for this lab.
-#
-# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
-# Fill every value. Check it before you push:
-#
-#     python tests/validate_submission.py
-#
-# The validator checks shape, never quality. A green run is the floor, not the grade.
-# If you cannot run Python, fill the file by hand against the comments — a malformed
-# file costs you nothing if the content is there.
-
 schema: 1
 week: "06"
 
 student:
   name: Olzhabay Kuanysh
-  student_id: 24B031954          # replace with your exact KBTU student ID, e.g. 23B030123
+  student_id: 24B031954   
   github: kuanysh14
 
 assistant:
@@ -33,20 +22,14 @@ counts:
   final_matches: 9
 
 checker:
-  # Numbers from YOUR last run of: python tests/check_prototype.py
-  # They must add up to the number of checks it runs (27).
-  # Report them as they came out.
-  # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
+
   pass: 27
   fail: 0
   error: 0
-  commit: 17e1884      # replace with output of: git rev-parse --short HEAD
+  commit: 17e1884     
   known_fails: []
 
 assumptions:
-  # AC1 allows a booking to end at 1440 (24:00). A time input usually stops at 23:59.
-  # Decide what YOUR final page does, declare it, defend it in lab-report.md §9.2.
-  # Any answer is acceptable. Not deciding is not.
   end_of_day: not-expressible
 
 review_findings:
