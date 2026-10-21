@@ -1,0 +1,45 @@
+schema: 1
+week: "06"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954   
+  github: kuanysh14
+
+assistant:
+  tool: Bolt.new
+  model: not displayed
+  fallback_reason: none
+
+bolt:
+  project_url: https://bolt.new/~/sb1-jks36ria
+
+counts:
+  issues: 2
+  cleanup_prompts: 2
+  change_log_rows: 3
+  v1_matches: 3
+  final_matches: 9
+
+checker:
+
+  pass: 27
+  fail: 0
+  error: 0
+  commit: 17e1884     
+  known_fails: []
+
+assumptions:
+  end_of_day: not-expressible
+
+review_findings:
+  - "T6 & AC1: v1's Clock.tsx locked current time to new Date() without an input, making T6 (09:00-09:30 at 09:00) Not testable and rejecting T1/T4/T8/T9 in the afternoon."
+  - "T3 & AC3: v1's RoomList.tsx set disabled={room.blocked} on Cedar Seminar Room, making it impossible to select the blocked room in the UI to test AC3."
+  - "T2, T7 & AC6: v1's src/lib/availability.ts formatted overlap ranges in raw minutes (600-660 min) instead of HH:MM and lacked a dedicated reversed-time message."
+  - "Scope (P3): v1's package.json included unused @supabase/supabase-js and dist/ bundle artifacts; rejected Bolt's suggestion to keep the dependency and removed both."
+
+honesty:
+  v1_export_unedited: yes
+  screenshots_unedited: yes
+  can_explain_component_without_ai: yes
+  ai_usage_disclosed: yes
