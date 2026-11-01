@@ -2,25 +2,20 @@
 
 <!-- The ONLY file you write prose in. Keep every numbered heading (## 1. … ## 13.) and every
      ### sub-heading, and the **Label:** words — the checker finds your answers by them.
-     Replace every "(write here)" and "(paste here)". Delete these <!-- --> comments if you like. -->
+     Replace every "(write here)" and "(paste here)". Delete these <!-- --> <!-- comments if you like. -->
 
 ## 1. Setup and reuse
 
-<!-- Model: the exact model with its version, as the tool shows it ("ChatGPT" is a tool, not a
-     model). If the tool does not show it, write: not displayed
-     Reuse: week-05 if code/original/booking_v1.py is your Week 05 v1, copied unedited;
-     week-06 if web/original/ is your Week 06 v1 export; fresh if you generated it for this SIS. -->
-
 | Item | Value |
 | --- | --- |
-| Coding assistant (tool) | (write here) |
-| Coding assistant model | (write here) |
-| Bolt.new model | (write here) |
-| Bolt project link | (write here) |
-| Language | (write here) |
-| Path | (write here) |
-| Python v1 from | (write here) |
-| Web v1 from | (write here) |
+| Coding assistant (tool) | Claude.ai |
+| Coding assistant model | Claude Sonnet 5.5 |
+| Bolt.new model | not displayed |
+| Bolt project link | https://bolt.new/~/sb1-jks36ria |
+| Language | python |
+| Path | A |
+| Python v1 from | week-05 |
+| Web v1 from | week-06 |
 
 ## 2. Baseline — before any new AI exchange
 
@@ -73,35 +68,44 @@
 
 ## 3. Python v1 review
 
-<!-- One row per conditional branch in code/original/booking_v1.py (your language's v1 on
-     Path B). Quote the condition exactly. AC1-AC4 must all appear in the AC column. -->
-
 | Branch in v1 (quoted) | AC | Satisfies it? | Why |
 | --- | --- | --- | --- |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) | (write here) |
+| `if not (0 <= start < end <= 1440): return False` | AC1 | Yes | Enforces day bounds `0..1440` (allowing `end == 1440` for T8 and rejecting `end == 1441` for T9) and positive length (`start < end`, rejecting reversed T7 and zero-length slots). |
+| `if start <= now: return False` | AC1 | Yes | Uses `<=` so a booking starting at `now` (`start == now`, T6) or in the past (`start < now`) is rejected while `start == now + 1` passes. |
+| `if end - start > 120: return False` | AC2 | Yes | Uses strict `>` so a 120-minute slot (`720–840`, T4) passes while 121 minutes (`720–841`, T5) returns `False`. |
+| `if blocked: return False` | AC3 | Yes | Unconditionally rejects any request when the room is blocked (`blocked == True`, T3), even when `existing` is empty. |
+| `for booked_start, booked_end in existing: if start < booked_end and booked_start < end: return False` | AC4, AC5 | Yes | Checks every booking in `existing` without mutating it; strict `<` on both sides allows touching endpoints (`660 < 660` is `False` on T1) while rejecting all true overlaps (T2, T10). |
 
 ## 4. Prototype v1 in Bolt.new
 
 **Prompt as sent:**
 
 ~~~~text
-(paste here)
+Build a small responsive Smart Campus Room Availability Checker. Requirements:
+AC1: Accept a candidate interval only when 0 ≤ start < end ≤ 1440 and start is after the supplied current time.
+AC2: Reject a booking longer than 120 minutes.
+AC3: Reject the request when the selected room is blocked.
+AC4: Reject any interval that overlaps an existing booking; touching endpoints are allowed.
+AC5: Show a clear Available / Unavailable decision without changing the existing booking data.
+AC6: The page remains usable at desktop and narrow/mobile width and gives understandable validation feedback.
+Intervals include the start and exclude the end.
+Use fictional sample data only. Keep the implementation simple and within one-page scope. Do not add authentication, backend services, analytics, or unrelated features. After building, briefly list the main files/components you created.
 ~~~~
-
-<!-- Main generated files or components, with their path inside web/original/
-     (for example src/App.tsx). At least two. -->
 
 | Generated file or component | Path | Its role |
 | --- | --- | --- |
-| (write here) | (write here) | (write here) |
-| (write here) | (write here) | (write here) |
+| Availability checker module | `src/lib/availability.ts` | Implements `checkAvailability` and `overlapsExisting` enforcing AC1–AC5 against the selected room and bookings. |
+| Time conversion helpers | `src/lib/time.ts` | Converts between `HH:MM` strings and integer minutes after midnight (`0..1440`). |
+| Sample campus rooms data | `src/data/sampleData.ts` | Defines four fictional campus rooms (`Aurora Hall`, `Beacon Room`, `Cedar Seminar Room`, `Driftwood Lounge`) and their pre-set bookings. |
+| Main application shell | `src/App.tsx` | Wires room selection, current time state, interval inputs, decision card, and timeline on one responsive page. |
+| Current time clock widget | `src/components/Clock.tsx` | Displays the current campus time (`new Date()` in v1, replaced with an editable time input in final). |
+| Room selector list | `src/components/RoomList.tsx` | Renders the four campus rooms with capacity, location, and blocked status badges. |
 
 **What v1 does:**
 
-- (write here)
+- Renders four sample campus rooms (`Aurora Hall`, `Beacon Room`, `Cedar Seminar Room`, `Driftwood Lounge`) with a 24-hour visual booking timeline and read-only in-memory state that never mutates existing bookings on check (AC5 works).
+- Evaluates candidate start and end times immediately in `IntervalForm.tsx` and shows an `Available` or `Unavailable` card with rejection reasons in `DecisionCard.tsx`.
+- Locks `Current time` in `Clock.tsx` to `new Date()` with no input to set the supplied current time to `09:00` (`540`), disables clicking blocked `Cedar Seminar Room` (`disabled={room.blocked}` in `RoomList.tsx`), and formats overlap errors in raw minutes (`600–660 min`) while bundling unused `@supabase/supabase-js` in `package.json`.
 
 ## 5. Test cases — executed on both artifacts
 
@@ -221,43 +225,100 @@
 
 ### B1
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** Claude.ai
+- **Model:** Claude Sonnet 5.5
+- **Date:** 2026-10-11
+- **Stage:** Plan
+- **Source:** week-05
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+We are implementing `can_book(start, end, now, blocked, existing)` in Python using only the standard library.
+Before writing code, propose a short implementation plan:
+1. The checks in order, mapped to AC1–AC5:
+   - AC1: Candidate times are integer minutes after midnight: 0 <= start < end <= 1440; start strictly after now.
+   - AC2: Duration at most 120 minutes; exactly 120 is permitted.
+   - AC3: Reject every request when the room is blocked.
+   - AC4: Reject overlap with any existing booking; touching at an endpoint is NOT overlap.
+   - AC5: Return True only when AC1–AC4 hold, False otherwise, and never mutate existing bookings.
+2. Key assumptions about inputs.
+3. Boundary test cases to verify each rule.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
+## Implementation plan for `can_book`
+
+**Checks, in order (return `False` at the first failure, otherwise `True`):**
+
+1. **Range (AC1):** `0 <= start < end <= 1440`.
+2. **Not in the past (AC1):** `start > now` (strict).
+3. **Duration (AC2):** `end - start <= 120`.
+4. **Blocked (AC3):** if `blocked` is true, return `False`.
+5. **Overlap (AC4):** scan `existing` and reject if any `(s, e)` satisfies `start < e and s < end`. This works with the half-open rule, so touching endpoints do not count as overlap.
+6. **Otherwise:** return `True`.
+
+The cheap, fixed checks run first and the loop over `existing` runs last. The checks are independent, so the order does not change the result, only the work done. The function only reads `existing` and never sorts, appends, or removes (AC5).
+
+**Assumptions**
+
+- All inputs are integers, and `blocked` is a real Boolean.
+- Each tuple in `existing` is valid (`s < e`, within 0-1440), as the contract states, so I will not re-validate it.
+- `existing` may be empty, unsorted, or contain bookings that do not relate to each other, so the overlap check cannot depend on order.
+- A zero-length or reversed request (`start >= end`) is simply invalid, not an error, and returns `False` rather than raising.
+- Because `start > now` is strict and `now >= 0`, a booking starting at minute 0 can never be valid.
+- Exactly 120 minutes is allowed; 121 is not.
 ~~~~
 
 ### B2
 
-- **Tool:** (write here)
-- **Model:** (write here)
-- **Date:** (write here)
-- **Stage:** (write here)
-- **Source:** (write here)
+- **Tool:** Claude.ai
+- **Model:** Claude Sonnet 5.5
+- **Date:** 2026-10-11
+- **Stage:** Generate
+- **Source:** week-05
 
 **Prompt:**
 
 ~~~~text
-(paste here)
+The implementation plan is approved. Now write the Python function `can_book(start, end, now, blocked, existing)` using only the Python standard library so that it implements the approved plan and satisfies AC1–AC5 without mutating `existing`.
 ~~~~
 
 **Response:**
 
 ~~~~text
-(paste here)
-~~~~
+Here is the implementation of `can_book` following the approved plan and using only the standard library:
+
+```python
+def can_book(start, end, now, blocked, existing):
+    """Return True only if the requested slot satisfies AC1-AC4.
+
+    Times are integer minutes after midnight. Intervals include the start
+    and exclude the end. `existing` is read but never modified.
+    """
+    # AC1: valid range, and the slot must start after the current time.
+    if not (0 <= start < end <= 1440):
+        return False
+    if start <= now:
+        return False
+
+    # AC2: at most 120 minutes.
+    if end - start > 120:
+        return False
+
+    # AC3: the room must not be blocked.
+    if blocked:
+        return False
+
+    # AC4: reject any overlap; touching endpoints are allowed.
+    for booked_start, booked_end in existing:
+        if start < booked_end and booked_start < end:
+            return False
+
+    # AC5: every rule held.
+    return True
 
 ### B3
 
