@@ -1,3 +1,4 @@
+import { canBook } from '../booking';
 import { MINUTES_PER_DAY, minutesToLabel } from './time';
 
 export interface Booking {
@@ -39,6 +40,18 @@ function overlapsExisting(start: number, end: number, bookings: Booking[]): Book
 
 export function checkAvailability(req: CheckRequest): Decision {
   const { room, start, end, nowMinutes } = req;
+  const allowed = canBook({
+    start,
+    end,
+    now: nowMinutes,
+    blocked: room.blocked,
+    bookings: room.bookings,
+  });
+
+  if (allowed) {
+    return { status: 'available' };
+  }
+
   const reasons: string[] = [];
 
   if (end <= start) {
@@ -67,7 +80,5 @@ export function checkAvailability(req: CheckRequest): Decision {
     );
   }
 
-  return reasons.length === 0
-    ? { status: 'available' }
-    : { status: 'unavailable', reasons };
+  return { status: 'unavailable', reasons };
 }
