@@ -71,15 +71,30 @@ describe('canBook', () => {
     expect(canBook(makeParams({ start: 630, end: 690, bookings: [] }))).toBe(true);
   });
 
+  test('X1 AC1: starting 1 minute after now is accepted (541-571)', () => {
+    expect(canBook(makeParams({ start: 541, end: 571 }))).toBe(true);
+  });
+
+  test('X2 AC4: overlapping only the second of two bookings is rejected (720-780)', () => {
+    const bookings = [
+      { start: 600, end: 660 },
+      { start: 700, end: 760 },
+    ];
+    expect(canBook(makeParams({ start: 720, end: 780, bookings }))).toBe(false);
+  });
+
   test('T15 AC5: available request returns true and leaves bookings unchanged (660-720)', () => {
     const params = makeParams({ start: 660, end: 720 });
     const originalRef = params.bookings;
     const snapshot = structuredClone(params.bookings);
+    const jsonBefore = JSON.stringify(params.bookings);
 
     expect(canBook(params)).toBe(true);
 
     expect(params.bookings).toBe(originalRef);
     expect(params.bookings).toEqual(snapshot);
     expect(params.bookings).toHaveLength(1);
+    expect(JSON.stringify(params.bookings)).toBe(jsonBefore);
+    expect(JSON.stringify(params.bookings)).toBe(JSON.stringify(snapshot));
   });
 });
