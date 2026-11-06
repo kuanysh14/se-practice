@@ -1,0 +1,67 @@
+# week-07/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+# If you cannot run Python, fill the file by hand against the comments — a malformed
+# file costs you nothing if the content is there.
+
+schema: 1
+week: "07"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+
+project:
+  baseline: week-06
+  bolt_url: https://bolt.new/~/sb1-jks36ria
+  vitest: 2.1.9
+
+counts:
+  tests_first: 15
+  tests_final: 17
+  first_run_failed: 0
+  review_decisions: 4
+  mutants_detected: 3
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_suite.py
+  # They must add up to the number of checks it runs (33).
+  # Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
+  pass: 33
+  fail: 0
+  error: 0
+  commit: 671352c
+  known_fails: []
+
+assumptions:
+  # No AC says what canBook does when an EXISTING booking is reversed: {start: 700, end: 650}.
+  # Call your function with that booking and a 660-720 request, write down what it returns,
+  # and defend it in lab-report.md §9.3. Any answer is acceptable. Not checking is not.
+  invalid_existing_booking: returns-true
+
+review_findings:
+  # Three or more. One line each, and each one names what it is about: a case (T01-T14, X1, X2),
+  # an AC, a mutant (M1-M3), or a file.
+  # Worthless:        "The AI tests were mostly fine"
+  # Worth everything: "T06: the first suite expected 720-840 to be rejected, but AC2 allows exactly 120 minutes"
+  - "X1 (AC1): suites/first/booking.test.ts tested start == now (T02: 540-570) but omitted the valid start = now + 1 boundary (541-571)"
+  - "X2 (AC4): all overlap cases in suites/first/booking.test.ts used a single booking, so a loop checking only bookings[0] would pass without X2"
+  - "AC5 (T15): hardened data-preservation check in src/booking.test.ts by adding JSON.stringify before/after comparison alongside structuredClone"
+  - "M1-M3: verified that T06 catches M1 (duration >= 120), T01/T08/AC5 catch M2 (touching endpoints as overlap), and T13 catches M3 (missing blocked check)"
+
+honesty:
+  first_suite_unedited: yes
+  outputs_unedited: yes
+  mutants_restored: yes
+  ai_usage_disclosed: yes
