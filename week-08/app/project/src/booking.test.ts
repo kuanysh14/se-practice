@@ -97,4 +97,24 @@ describe('canBook', () => {
     expect(JSON.stringify(params.bookings)).toBe(jsonBefore);
     expect(JSON.stringify(params.bookings)).toBe(JSON.stringify(snapshot));
   });
+
+  test('BUG-A AC4: interval touching existing bookings on both sides is accepted (660-700)', () => {
+    const bookings = [
+      { start: 600, end: 660 },
+      { start: 700, end: 760 },
+    ];
+    expect(canBook(makeParams({ start: 660, end: 700, bookings }))).toBe(true);
+  });
+
+  test('BUG-B AC5: non-touching available request returns true without mutating bookings (720-780)', () => {
+    const params = makeParams({ start: 720, end: 780 });
+    const snapshot = structuredClone(params.bookings);
+    const jsonBefore = JSON.stringify(params.bookings);
+
+    expect(canBook(params)).toBe(true);
+
+    expect(params.bookings).toEqual(snapshot);
+    expect(JSON.stringify(params.bookings)).toBe(jsonBefore);
+    expect(params.bookings).toHaveLength(1);
+  });
 });
