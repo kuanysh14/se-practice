@@ -26,6 +26,5 @@ export function canBook({ start, end, now, blocked, bookings }: {
     if (start < b.end && end > b.start) return false;
   }
 
-  bookings.push({ start, end });
   return true;
 }
