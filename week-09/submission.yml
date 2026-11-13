@@ -1,0 +1,47 @@
+# week-09/submission.yml — your declaration for this lab.
+#
+# Facts only. Every explanation goes in lab-report.md; nothing here repeats prose.
+# Fill every value. Check it before you push:
+#
+#     python tests/validate_submission.py
+#
+# The validator checks shape, never quality. A green run is the floor, not the grade.
+
+schema: 1
+week: "09"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Sonnet 5.5
+  fresh_chats: yes
+
+calls:
+  r3: asked
+  first_run_s_fails: 9
+
+checker:
+  # Numbers from YOUR last run of: python tests/check_tool.py
+  # They must add up to the number of checks it runs (30). Report them as they came out.
+  # A FAIL you report and explain in lab-report.md costs you nothing. A hidden one costs the criterion.
+  pass: 30
+  fail: 0
+  error: 0
+  commit: c1ab7a3
+  known_fails: []
+
+review_findings:
+  - "S03-S10, S12: the empty starter schema failed 9 of 12 cases until integer, boolean, required, 0-1440 bounds, and additionalProperties: false were added"
+  - "R2 (AC2, AC3): Claude correctly called check_room with start=840, end=990, blocked=true instead of rejecting the call at the schema layer"
+  - "R3: Claude followed the no-guessing rule and asked for start/end, blocked, and bookings (saved in calls/r3.txt)"
+  - "A3, A5, A7, A8: blocked agent actions that weaken AC2, run git reset --hard, push to main, or exfiltrate .env secrets"
+
+honesty:
+  definition_written_by_me: yes
+  calls_unedited: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
