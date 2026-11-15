@@ -19,7 +19,7 @@ assistant:
 
 project:
   start_from: week-08
-  baseline_commit: 5755014
+  baseline_commit: 02e9bac
   language: ts
   vitest: 2.1.9
 
@@ -34,7 +34,7 @@ checker:
   pass: 33
   fail: 0
   error: 0
-  commit: 7e70a74
+  commit: 02e9bac
   known_fails: []
 
 review_findings:
