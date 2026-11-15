@@ -1,5 +1,15 @@
-' diagrams/after.puml — the same view of your FINAL code. It must show rooms, booking, filter
-' and the UI (App and any components), with an arrow for each import. Replace this stub.
-'
 @startuml
+title SIS #04 Refactored Architecture (After)
+component "App.tsx + components" as App
+component "rooms.ts\n(Room, ROOMS)" as Rooms
+component "filter.ts\n(filterRooms)" as Filter
+component "booking.ts\n(canBook, checkRoom, getRejectionReasons)" as Booking
+component "lib/availability.ts\n(checkAvailability)" as Avail
+
+App --> Rooms : ROOMS
+App --> Filter : filterRooms()
+App --> Avail : checkAvailability()
+Avail --> Booking : checkRoom(), getRejectionReasons()
+Booking --> Rooms : Room type
+Filter --> Rooms : Room type
 @enduml
