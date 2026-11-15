@@ -1,0 +1,14 @@
+@startuml
+title Week 08 Starting Point (Before Refactoring)
+component "App.tsx" as App
+component "lib/availability.ts" as Avail
+component "booking.ts" as Booking
+component "data/sampleData.ts" as Data
+component "components/*" as UI
+
+App --> Avail : checkAvailability()
+App --> Data : hardcoded rooms
+App --> UI : RoomList, IntervalForm, DecisionCard
+Avail --> Booking : canBook()
+note right of Avail : Duplicated overlap, 120-min,\nand blocked checks for UI reasons
+@enduml

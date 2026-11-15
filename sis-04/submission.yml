@@ -1,0 +1,50 @@
+# SIS #04 — the declaration. FACTS ONLY: every explanation stays in report.md.
+#
+# Fill this in LAST, after your final run of the checker, then validate it:
+#     python tests/check_sis.py
+#     python tests/validate_submission.py
+
+schema: 1
+assignment: "sis-04"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  group: Monday 18:00-19:00
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+
+project:
+  start_from: week-08
+  baseline_commit: 02e9bac
+  language: ts
+  vitest: 2.1.9
+
+counts:
+  rooms: 4
+  tests_original: 19
+  tests_final: 15
+  risks: 4
+  exchanges: 3
+
+checker:
+  pass: 33
+  fail: 0
+  error: 0
+  commit: 02e9bac
+  known_fails: []
+
+review_findings:
+  - "checkRoom (src/booking.ts): rejected Claude's suggestion to return { ok, reason } so checkRoom keeps its required boolean signature"
+  - "A5 / src/lib/availability.ts: moved getRejectionReasons and findOverlappingBooking into src/booking.ts to remove duplicated rule logic"
+  - "F2 / B5 / B6 (src/filter.ts): used equipment.every() and capacity >= attendees so rooms missing any selected tag or 1 seat below are excluded"
+  - "F5 / INT (src/booking.test.ts): verified that switching from room-a to room-b for 660-720 flips the result from true to false using each room's bookings"
+
+honesty:
+  baseline_unchanged: yes
+  runs_unedited: yes
+  no_invented_metrics: yes
+  ai_usage_disclosed: yes
