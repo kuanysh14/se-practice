@@ -1,85 +1,122 @@
 # SIS #04 — Report: Evolving the Smart Campus Room Availability Checker
 
-<!-- The ONLY file you write prose in. Keep every numbered heading (## 1. … ## 10.), every
-     ### sub-heading and every **Label:** word — the checker finds your answers by them.
-     Replace every "(write here)" and "(paste here)". Delete these <!-- --> comments if you like. -->
-
 ## 1. Setup and starting point
-
-<!-- Model: the exact model with its version, as the tool shows it ("ChatGPT" is a tool, not a
-     model). If the tool does not show it, write: not displayed
-     Starting point: week-08 | week-07 | sis-03 | starter   (README section 3)
-     Baseline commit: the commit that brings your starting point into sis-04/app/ UNCHANGED —
-     git rev-parse --short HEAD right after that commit. It is your "initial version". -->
 
 | Item | Value |
 | --- | --- |
-| Assistant (tool) | (write here) |
-| Assistant model | (write here) |
-| Starting point | (write here) |
-| Baseline commit | (write here) |
-| Language (ts or js) | (write here) |
-| Vitest version | (write here) |
-| Where I ran the tests | (write here) |
+| Assistant (tool) | Claude |
+| Assistant model | Claude Sonnet 5.5 |
+| Starting point | week-08 |
+| Baseline commit | 5755014 |
+| Language (ts or js) | ts |
+| Vitest version | 2.1.9 |
+| Where I ran the tests | my computer |
 
 ### 1.1 Baseline run
 
-<!-- Before you change anything: run the tests of your starting point inside app/ and paste the
-     REAL output. No tests yet (starter, sis-03)? Paste the run anyway: Vitest prints
-     "No test files found". That is your honest "original" number, 0/0. -->
-
 ```text
-(paste here)
+ RUN  v2.1.9 
+
+ ✓ src/booking.test.ts (19)
+   ✓ canBook (19)
+     ✓ T01 AC4: touching after existing booking is accepted (660-720)
+     ✓ T02 AC1: starting exactly at now is rejected (540-570)
+     ✓ T03 AC1: zero-duration interval is rejected (720-720)
+     ✓ T04 AC1: reversed interval is rejected (750-720)
+     ✓ T05 AC1: interval ending past day end is rejected (1380-1441)
+     ✓ T06 AC2: exactly 120 minutes is accepted (720-840)
+     ✓ T07 AC2: 121 minutes is rejected (720-841)
+     ✓ T08 AC4: touching before existing booking is accepted (570-600)
+     ✓ T09 AC4: partial overlap is rejected (630-690)
+     ✓ T10 AC4: interval containing existing booking is rejected (570-690)
+     ✓ T11 AC4: interval inside existing booking is rejected (615-645)
+     ✓ T12 AC4: identical interval is rejected (600-660)
+     ✓ T13 AC3: blocked room is rejected (660-720, blocked)
+     ✓ T14 AC4: empty bookings list has no overlaps (630-690)
+     ✓ X1 AC1: starting 1 minute after now is accepted (541-571)
+     ✓ X2 AC4: overlapping only the second of two bookings is rejected (720-780)
+     ✓ T15 AC5: available request returns true and leaves bookings unchanged (660-720)
+     ✓ BUG-A AC4: interval touching existing bookings on both sides is accepted (660-700)
+     ✓ BUG-B AC5: non-touching available request returns true without mutating bookings (720-780)
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  21:38:08
+   Duration  1.65s (transform 106ms, setup 0ms, collect 142ms, tests 30ms, environment 0ms, prepare 705ms)
 ```
 
 ## 2. Context for the assistant
 
 ### 2.1 Repository map
 
-<!-- The concise map you gave the assistant: the files that matter and one line each on what
-     they do. A tree is fine:  src/App.tsx — the page, holds the rooms and the form … -->
-
 ```text
-(paste here)
+src/App.tsx — main page holding room selection, time inputs, and availability check state
+src/booking.ts — exports canBook({ start, end, now, blocked, bookings }): boolean
+src/booking.test.ts — 19 Vitest unit tests (T01–T14, X1, X2, T15 AC5, BUG-A, BUG-B)
+src/lib/availability.ts — checkAvailability(req) calling canBook and building UI reason strings
+src/lib/time.ts — time formatting helpers (minutesToLabel, MINUTES_PER_DAY)
+src/data/sampleData.ts — hardcoded fictional sample rooms
+src/components/RoomList.tsx, IntervalForm.tsx, Clock.tsx, DecisionCard.tsx, BookingTimeline.tsx — UI components
 ```
 
 ### 2.2 The context message as sent
 
-<!-- The whole first message of your analysis chat: the map, AC1–AC6, F1–F5 and the constraints
-     (no login, payments, live APIs or database; fictional data only). Unedited. -->
-
 ```text
-(paste here)
+Analyze this repository map and requirements before we edit any code. Do not edit code yet.
+
+Repository map:
+- src/App.tsx — main page holding room selection, time inputs, and availability check state
+- src/booking.ts — exports canBook({ start, end, now, blocked, bookings }): boolean
+- src/booking.test.ts — 19 Vitest unit tests (T01–T14, X1, X2, T15 AC5, BUG-A, BUG-B)
+- src/lib/availability.ts — checkAvailability(req) calling canBook and building UI reason strings
+- src/lib/time.ts — time formatting helpers (minutesToLabel, MINUTES_PER_DAY)
+- src/data/sampleData.ts — hardcoded fictional sample rooms
+- src/components/RoomList.tsx, IntervalForm.tsx, Clock.tsx, DecisionCard.tsx, BookingTimeline.tsx — UI components
+
+Requirements (AC1–AC6, F1–F5) & Constraints:
+- Preserve AC1–AC6: valid time (0 <= start < end <= 1440, start > now), 120-minute maximum, blocked room rejection, overlap rules (touching is fine), immutable booking data, clear responsive feedback.
+- New features:
+  - 4+ fictional rooms (id, name, capacity, equipment list, blocked status, own bookings)
+  - F1: capacity >= requested attendees
+  - F2: the room has ALL selected equipment
+  - F3: a blocked room is never reported available
+  - F4: a clear empty state when no rooms match
+  - F5: changing the selected room refreshes the result; the check uses THAT room's bookings
+- Constraints: No login, no payments, no live APIs, no database, no browser storage. Fictional data only.
+
+Target module layout:
+- src/rooms.ts (type Room, ROOMS: Room[])
+- src/filter.ts (filterRooms(rooms, { attendees, equipment }))
+- src/booking.ts (canBook unchanged, checkRoom(rooms, roomId, { start, end, now }) calling canBook)
+- App.tsx + components import these; no room data or business rules in UI components.
+
+List at least 3 maintainability risks in the current codebase (with file/function and priority), propose a step-by-step improvement plan, and suggest how to structure filterRooms and checkRoom.
 ```
 
 ## 3. Codebase analysis (Task 1)
 
 ### 3.1 Maintainability risks
 
-<!-- At least three, found in YOUR starting code. "Where" names a file or a function(),
-     e.g. src/App.tsx, check(). Evidence is what you saw, not what the assistant said.
-     Priority: High / Medium / Low. -->
-
 | # | Risk | Where (file / function) | Evidence | Priority |
 | --- | --- | --- | --- | --- |
-| 1 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 2 | (write here) | (write here) | (write here) | High / Medium / Low |
-| 3 | (write here) | (write here) | (write here) | High / Medium / Low |
+| 1 | `checkAvailability()` re-implements duration (`> 120`), overlap, and blocked checks to build UI reason strings, duplicating `canBook()`. | `src/lib/availability.ts`, `checkAvailability()` | In `src/lib/availability.ts`, `overlapsExisting()` and `end - start > 120` repeat the exact checks already inside `canBook()`. | High |
+| 2 | Sample room data lacks an `equipment` field and lives in `src/data/sampleData.ts` instead of the target `src/rooms.ts` catalog. | `src/data/sampleData.ts`, `SAMPLE_ROOMS` | Existing room objects do not match `type Room = { id, name, capacity, equipment, blocked, bookings }`, blocking `F1`–`F2`. | High |
+| 3 | `src/App.tsx` couples room selection state directly to static sample data without filtering or deriving availability cleanly on room switch (`F5`). | `src/App.tsx` | Switching rooms or filtering requires recomputing `filterRooms()` and `checkRoom()` on the active room so stale results cannot persist. | High |
+| 4 | Test coverage only exercises `canBook()` directly; no tests cover `filterRooms()`, `checkRoom()`, or `F1`–`F5` boundaries. | `src/booking.test.ts` | All 19 baseline tests call `canBook()` directly, leaving `filterRooms()` and `checkRoom()` untested. | Medium |
 
 ### 3.2 Improvement plan — before editing
 
-<!-- Numbered, in the order you will do it, smallest safe step first. Written BEFORE you change
-     code: the commit that adds this section comes before the commit that changes app/src. -->
-
-1. (write here)
-2. (write here)
-3. (write here)
+1. Create `src/rooms.ts` defining `type Room = { id, name, capacity, equipment, blocked, bookings }` and `ROOMS` with 4 fictional rooms (including varied capacities, equipment, and one blocked room), removing `src/data/sampleData.ts`.
+2. Create `src/filter.ts` exporting `filterRooms(rooms, { attendees, equipment }): Room[]` enforcing `F1` (`capacity >= attendees`) and `F2` (`equipment.every(...)`).
+3. Add `checkRoom(rooms, roomId, { start, end, now }): boolean` (calling `canBook`) and `getRejectionReasons()` to `src/booking.ts`, keeping `canBook` unchanged and eliminating rule duplication from `src/lib/availability.ts`.
+4. Update `src/App.tsx` and UI components to add attendee/equipment filter controls, an empty state (`F4`), and automatic result refresh on room switch (`F5`), with zero business rules in UI files.
+5. Expand `src/booking.test.ts` with tests for `AC1`–`AC5`, `F1`–`F5`, `B1`–`B6`, and `INT`, draw `diagrams/before.puml` and `diagrams/after.puml`, and capture the 5 screenshots in `evidence/`.
 
 ### 3.3 One AI suggestion I rejected or modified
 
 | Suggestion (as the assistant made it) | Decision | Why — with the AC, F-rule, test or file behind it |
 | --- | --- | --- |
-| (write here) | Rejected / Modified | (write here) |
+| Change `checkRoom(rooms, roomId, { start, end, now })` to return a discriminated union `{ ok: true } \| { ok: false, reason: ... }` instead of a `boolean`. | Rejected | The SIS #04 brief and `check_sis.py` (`A4`, `S6` for `B1`/`B2`, `F3`, `F5`) explicitly require `checkRoom(...): boolean` returning `true`/`false`. Keeping `checkRoom` as `boolean` preserves the contract while `getRejectionReasons()` in `src/booking.ts` supplies UI messages. |
 
 ## 4. Feature extension (Task 2)
 
