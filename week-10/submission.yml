@@ -1,0 +1,52 @@
+schema: 1
+week: "10"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Claude
+  model: Claude Sonnet 5.5
+  environment: chat
+
+project:
+  starting_point: week-08
+  baseline_commit: b724929
+  language: ts
+  vitest: 2.1.9
+
+counts:
+  claims_challenged: 6
+  risks_registered: 5
+  risks_confirmed: 4
+  tests_final: 20
+  agents_lines_changed: 7
+
+audit:
+  level: 1
+
+decision:
+  top_two: [R1, R2]
+  mitigated: [R1, R2]
+  release: conditional
+
+checker:
+  pass: 31
+  fail: 0
+  error: 0
+  commit: 0d7b258
+  known_fails: []
+
+review_findings:
+  - "R1 (AGENTS.md, C1-C6): patched 7 lines to remove real KBTU data, Supabase/login, netlify deploy --prod, wrong AC4, and missing npm run test:unit"
+  - "R2 (src/booking.ts, AC1): regression test R2 (660.5-720) failed before refactoring canBook with Number.isInteger pure helpers and passed after"
+  - "availability.ts (AC1, AC5): challenged and labelled Claude's claims about missing day-bounds checks and mutation as unsupported after reading the file"
+  - "Readiness audit (1a-3d): project clears Level 1 (4/5 rows) but needs .env.example (2a) and app README.md (2b) to reach Level 2"
+
+honesty:
+  review_was_read_only: yes
+  agents_patch_approved_by_me: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
