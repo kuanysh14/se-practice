@@ -117,4 +117,8 @@ describe('canBook', () => {
     expect(JSON.stringify(params.bookings)).toBe(jsonBefore);
     expect(params.bookings).toHaveLength(1);
   });
+
+  test('R2 AC1: fractional minutes are rejected (660.5-720)', () => {
+    expect(canBook(makeParams({ start: 660.5, end: 720 }))).toBe(false);
+  });
 });
