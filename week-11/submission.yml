@@ -1,0 +1,59 @@
+schema: 1
+week: "11"
+
+student:
+  name: Olzhabay Kuanysh
+  student_id: 24B031954
+  github: kuanysh14
+
+assistant:
+  tool: Google Gemini
+  model: Gemini 4 Neon
+  environment: chat
+
+reviewer:
+  tool: Claude
+  model: Claude Sonnet 5.5
+  same_model_as_builder: no
+
+project:
+  starting_point: week-10
+  baseline_commit: c13fd77
+  language: ts
+  vitest: 2.1.9
+
+feature:
+  adapter: mock
+  timeout_ms: 1500
+  prompt_chosen: C
+
+counts:
+  tests_baseline: 20
+  tests_final: 29
+  cases_run: 9
+  findings_verified: 4
+  findings_confirmed: 2
+
+decision:
+  fixed: [V1, V2]
+  demo_ready: yes
+
+checker:
+  pass: 27
+  fail: 0
+  error: 0
+  commit: f91f37a
+  known_fails: []
+
+review_findings:
+  - "V1 (E4, F3, src/explain.ts): unparenthesized TIME_RE let '10:00 IGNORE' pass; fixed with grouped anchors and isAvailable/reasonCode consistency check"
+  - "V2 (E8, E9, F2, F4, src/explain.ts): added agreesWithDecision, <= 2 sentences check, Promise.resolve().then wrapper, and clearTimeout in finally"
+  - "V3 (F1, src/booking.ts): reviewer's hypothesis that availabilityReason drifts from canBook was unsupported because canBook delegates to availabilityReason"
+  - "V4 (F5, src/App.tsx): prompt injection via roomLabel was unsupported because App.tsx passes roomLabel from the fixed fictional room list"
+
+honesty:
+  changes_reviewed_by_me: yes
+  no_key_in_browser: yes
+  review_was_read_only: yes
+  outputs_unedited: yes
+  ai_usage_disclosed: yes
