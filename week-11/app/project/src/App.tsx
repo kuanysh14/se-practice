@@ -1,128 +1,295 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Building2, Search } from 'lucide-react';
-import { sampleRooms } from '@/data/sampleData';
-import type { Decision } from '@/lib/availability';
-import { checkAvailability } from '@/lib/availability';
-import { labelToMinutes } from '@/lib/time';
-import { Clock } from '@/components/Clock';
-import { RoomList } from '@/components/RoomList';
-import { IntervalForm } from '@/components/IntervalForm';
-import { DecisionCard } from '@/components/DecisionCard';
-import { BookingTimeline } from '@/components/BookingTimeline';
+import { useState } from 'react';
+import { availabilityReason, canBook, type BookingSlot } from './booking';
+import {
+  explainAvailability,
+  mockExplainAdapter,
+  type ExplainResult,
+} from './explain';
 
-const DEFAULT_NOW = 9 * 60; // 09:00
+interface Room {
+  id: string;
+  name: string;
+  location: string;
+  capacity: number;
+  blocked: boolean;
+  blockedReason?: string;
+  bookings: (BookingSlot & { id: string; title: string })[];
+}
 
-function App() {
-  const [rooms] = useState(sampleRooms);
-  const [nowMinutes, setNowMinutes] = useState<number>(DEFAULT_NOW);
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>('room-beacon');
-  const [startLabel, setStartLabel] = useState('');
-  const [endLabel, setEndLabel] = useState('');
-  const [startTouched, setStartTouched] = useState(false);
-  const [endTouched, setEndTouched] = useState(false);
+const ROOMS: Room[] = [
+  {
+    id: 'beacon',
+    name: 'Beacon Room',
+    location: 'Building 1, Floor 2',
+    capacity: 8,
+    blocked: false,
+    bookings: [
+      { id: 'b1', start: 600, end: 660, title: 'SE Practice Sync' },
+    ],
+  },
+  {
+    id: 'cedar',
+    name: 'Cedar Seminar Room',
+    location: 'Building 3, Floor 4',
+    capacity: 12,
+    blocked: true,
+    blockedReason: 'Audio-visual maintenance',
+    bookings: [],
+  },
+];
 
-  const handleNowChange = useCallback((m: number) => setNowMinutes(m), []);
+const toMinutes = (hhmm: string): number => {
+  if (!hhmm || !hhmm.includes(':')) return NaN;
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+};
 
-  const selectedRoom = useMemo(
-    () => rooms.find((r) => r.id === selectedRoomId) ?? null,
-    [rooms, selectedRoomId]
-  );
+const formatMinutes = (mins: number): string => {
+  const h = String(Math.floor(mins / 60)).padStart(2, '0');
+  const m = String(mins % 60).padStart(2, '0');
+  return `${h}:${m}`;
+};
 
-  const start = labelToMinutes(startLabel);
-  const end = labelToMinutes(endLabel);
+export default function App() {
+  const [selectedRoomId, setSelectedRoomId] = useState(ROOMS[0].id);
+  const [nowStr, setNowStr] = useState('09:00');
+  const [startStr, setStartStr] = useState('11:00');
+  const [endStr, setEndStr] = useState('12:00');
+  const [simulateFailure, setSimulateFailure] = useState(false);
+  const [explainResult, setExplainResult] = useState<ExplainResult | null>(null);
+  const [explainError, setExplainError] = useState<string | null>(null);
+  const [isExplaining, setIsExplaining] = useState(false);
 
-  const decision: Decision | null = useMemo(() => {
-    if (!selectedRoom || start == null || end == null) return null;
-    return checkAvailability({ room: selectedRoom, start, end, nowMinutes });
-  }, [selectedRoom, start, end, nowMinutes]);
+  const selectedRoom = ROOMS.find((r) => r.id === selectedRoomId) ?? ROOMS[0];
+  const nowMinutes = toMinutes(nowStr);
+  const startMinutes = toMinutes(startStr);
+  const endMinutes = toMinutes(endStr);
 
-  const startError =
-    startTouched && start == null ? 'Enter a valid time, e.g. 14:00' : undefined;
-  const endError = endTouched && end == null ? 'Enter a valid time, e.g. 15:00' : undefined;
+  const checkParams = {
+    start: startMinutes,
+    end: endMinutes,
+    now: nowMinutes,
+    blocked: selectedRoom.blocked,
+    bookings: selectedRoom.bookings,
+  };
 
-  function resetForm() {
-    setStartLabel('');
-    setEndLabel('');
-    setStartTouched(false);
-    setEndTouched(false);
+  const isAvailable = canBook(checkParams);
+  const reasonCode = availabilityReason(checkParams);
+
+  function resetExplanation() {
+    setExplainResult(null);
+    setExplainError(null);
+  }
+
+  async function handleExplain() {
+    setIsExplaining(true);
+    setExplainError(null);
+    try {
+      const adapter = simulateFailure
+        ? () => Promise.reject(new Error('Simulated adapter failure'))
+        : mockExplainAdapter;
+
+      const result = await explainAvailability(
+        {
+          roomLabel: selectedRoom.name,
+          start: startStr,
+          end: endStr,
+          isAvailable,
+          reasonCode,
+        },
+        adapter
+      );
+      setExplainResult(result);
+    } catch (err) {
+      setExplainResult(null);
+      setExplainError(err instanceof Error ? err.message : 'Unable to generate explanation.');
+    } finally {
+      setIsExplaining(false);
+    }
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
-              <Building2 size={18} />
-            </span>
-            <div>
-              <h1 className="text-lg font-bold leading-tight">Smart Campus</h1>
-              <p className="text-xs text-slate-500">Room Availability Checker</p>
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <header className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+          <h1 className="text-2xl font-bold text-slate-900">
+            Smart Campus Room Availability Checker
+          </h1>
+          <p className="text-sm text-slate-600 mt-1">
+            Deterministic availability check with optional generated explanation.
+          </p>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3">
+            <h2 className="text-lg font-semibold text-slate-800">1. Select Room</h2>
+            <div className="space-y-2.5">
+              {ROOMS.map((room) => {
+                const active = room.id === selectedRoom.id;
+                return (
+                  <button
+                    key={room.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedRoomId(room.id);
+                      resetExplanation();
+                    }}
+                    className={`w-full text-left rounded-lg border p-3.5 transition ${
+                      active
+                        ? 'border-indigo-600 bg-indigo-50/60 ring-2 ring-indigo-500/20'
+                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-semibold text-slate-900">{room.name}</span>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          room.blocked
+                            ? 'bg-rose-100 text-rose-800'
+                            : 'bg-emerald-100 text-emerald-800'
+                        }`}
+                      >
+                        {room.blocked ? 'Blocked' : `Seats ${room.capacity}`}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">{room.location}</p>
+                  </button>
+                );
+              })}
             </div>
-          </div>
-          <Clock nowMinutes={nowMinutes} onChange={handleNowChange} />
-        </div>
-      </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
-        <section>
-          <div className="mb-3 flex items-center gap-2">
-            <Search size={16} className="text-slate-400" />
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              Choose a room
-            </h2>
-          </div>
-          <RoomList rooms={rooms} selectedId={selectedRoomId} onSelect={setSelectedRoomId} />
-        </section>
-
-        <section className="grid gap-6 lg:grid-cols-5">
-          <div className="lg:col-span-3 space-y-4 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-            <h2 className="text-base font-semibold text-slate-800">Check an interval</h2>
-            <IntervalForm
-              startLabel={startLabel}
-              endLabel={endLabel}
-              onStartChange={setStartLabel}
-              onEndChange={setEndLabel}
-              onStartBlur={() => setStartTouched(true)}
-              onEndBlur={() => setEndTouched(true)}
-              startError={startError}
-              endError={endError}
-            />
-            <DecisionCard
-              decision={decision}
-              start={start}
-              end={end}
-              roomName={selectedRoom?.name}
-            />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-              >
-                Reset
-              </button>
+            <div className="pt-3 border-t border-slate-200">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                Existing Bookings ({selectedRoom.name})
+              </h3>
+              {selectedRoom.bookings.length === 0 ? (
+                <p className="text-xs text-slate-500">No existing bookings today.</p>
+              ) : (
+                <ul className="space-y-1.5 text-xs">
+                  {selectedRoom.bookings.map((b) => (
+                    <li
+                      key={b.id}
+                      className="flex items-center justify-between rounded bg-slate-100 px-3 py-1.5"
+                    >
+                      <span className="font-medium text-slate-800">{b.title}</span>
+                      <span className="text-slate-600">
+                        {formatMinutes(b.start)}–{formatMinutes(b.end)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          </div>
+          </section>
 
-          <div className="lg:col-span-2">
-            {selectedRoom ? (
-              <BookingTimeline room={selectedRoom} />
-            ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-400">
-                Select a room to view its bookings.
+          <section className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+            <h2 className="text-lg font-semibold text-slate-800">2. Check & Explain</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  Current Time
+                </label>
+                <input
+                  type="time"
+                  value={nowStr}
+                  onChange={(e) => {
+                    setNowStr(e.target.value);
+                    resetExplanation();
+                  }}
+                  className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+                />
               </div>
-            )}
-          </div>
-        </section>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  Start Time
+                </label>
+                <input
+                  type="time"
+                  value={startStr}
+                  onChange={(e) => {
+                    setStartStr(e.target.value);
+                    resetExplanation();
+                  }}
+                  className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1">
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={endStr}
+                  onChange={(e) => {
+                    setEndStr(e.target.value);
+                    resetExplanation();
+                  }}
+                  className="w-full rounded-lg border border-slate-300 px-2.5 py-1.5 text-sm"
+                />
+              </div>
+            </div>
 
-        <footer className="pb-6 text-center text-xs text-slate-400">
-          Sample data only · Intervals include the start minute and exclude the end minute ·
-          No booking data is changed.
-        </footer>
-      </main>
+            <div
+              className={`rounded-lg border p-4 ${
+                isAvailable
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
+                  : 'border-rose-300 bg-rose-50 text-rose-950'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">{selectedRoom.name}</span>
+                <span className="text-base font-bold">
+                  {isAvailable ? 'Available' : 'Unavailable'}
+                </span>
+              </div>
+              <p className="text-xs mt-1 opacity-80">
+                Deterministic status reason: <code>{reasonCode}</code>
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-slate-200 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={handleExplain}
+                  disabled={isExplaining}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isExplaining ? 'Explaining...' : 'Explain availability'}
+                </button>
+
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={simulateFailure}
+                    onChange={(e) => setSimulateFailure(e.target.checked)}
+                    className="rounded border-slate-300"
+                  />
+                  Simulate adapter failure (fallback)
+                </label>
+              </div>
+
+              {explainError && (
+                <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+                  {explainError}
+                </div>
+              )}
+
+              {explainResult && (
+                <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3.5 text-sm text-indigo-950">
+                  <span className="font-semibold">
+                    {explainResult.usedFallback
+                      ? 'Generated explanation (fallback): '
+                      : 'Generated explanation: '}
+                  </span>
+                  {explainResult.explanation}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default App;
